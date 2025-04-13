@@ -1,13 +1,12 @@
-import { useState } from 'react'
-import { Button } from "@/Components/ui/button"
+import Layout from './Components/Layout';
+import HomePage from './Pages/HomePage';
 
 function App() {
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-svh">
-      <Button>Click me</Button>
-    </div>
-  )
+    <Layout>
+      <HomePage />
+    </Layout>
+  );
 }
 
-export default App
+export default App;
