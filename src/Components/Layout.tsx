@@ -4,13 +4,14 @@ import Header from './Header';
 
 interface LayoutProps {
   children: ReactNode;
-  onNavigate?: (page: 'home' | 'cats') => void;
+  currentPage: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership';
+  onNavigate?: (page: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership') => void;
 }
 
-const Layout = ({ children, onNavigate }: LayoutProps) => {
+const Layout = ({ children, currentPage, onNavigate }: LayoutProps) => {
   return (
     <div className="flex h-screen bg-black text-white">
-      <AppSidebar onNavigate={onNavigate} />
+      <AppSidebar currentPage={currentPage} onNavigate={onNavigate} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto bg-black">

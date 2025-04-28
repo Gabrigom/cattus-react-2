@@ -1,14 +1,25 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import Notification from './Notification';
+import ProfilePopup from './ProfilePopup';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileBtnRef = useRef<HTMLButtonElement>(null);
   
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+  
+  const toggleProfileMenu = () => {
+    setShowProfileMenu(prev => !prev);
+  };
+  
+  const closeProfileMenu = () => {
+    setShowProfileMenu(false);
   };
   
   return (
@@ -28,14 +39,25 @@ const Header = () => {
       <div className="flex items-center space-x-4">
         <Notification />
         
-        <div className="flex items-center">
-          <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
+        <div className="relative">
+          <Button 
+            ref={profileBtnRef}
+            variant="ghost" 
+            className="p-0 h-auto hover:bg-transparent"
+            onClick={toggleProfileMenu}
+          >
             <img
               src="/imgs/profile_sample.png" 
               alt="Profile picture"
               className="w-8 h-8 rounded-full"
             />
           </Button>
+          
+          {/* Profile Menu Popup */}
+          <ProfilePopup 
+            isOpen={showProfileMenu}
+            onClose={closeProfileMenu}
+          />
         </div>
       </div>
     </header>

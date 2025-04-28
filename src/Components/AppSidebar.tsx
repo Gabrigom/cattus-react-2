@@ -20,10 +20,11 @@ interface CatEntry {
 }
 
 interface AppSidebarProps {
-  onNavigate?: (page: 'home' | 'cats') => void;
+  currentPage: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership';
+  onNavigate?: (page: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership') => void;
 }
 
-const AppSidebar = ({ onNavigate }: AppSidebarProps) => {
+const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
   // Mock data
   const markedCats: CatEntry[] = [
     { id: '0001', name: 'Pompeu1', age: 10, imageUrl: '/api/placeholder/40/40' },
@@ -35,15 +36,15 @@ const AppSidebar = ({ onNavigate }: AppSidebarProps) => {
   const menuItems = [
     { icon: <Home size={22} />, label: 'Inicio', page: 'home' },
     { icon: <Cat size={22} />, label: 'Gatos', page: 'cats' },
-    { icon: <Camera size={22} />, label: 'Câmeras', page: null },
-    { icon: <BarChart2 size={22} />, label: 'Estatísticas', page: null },
-    { icon: <FileText size={22} />, label: 'Relatórios', page: null },
-    { icon: <DollarSign size={22} />, label: 'Assinatura', page: null },
+    { icon: <Camera size={22} />, label: 'Câmeras', page: 'cameras' },
+    { icon: <BarChart2 size={22} />, label: 'Estatísticas', page: 'stats' },
+    { icon: <FileText size={22} />, label: 'Relatórios', page: 'reports' },
+    { icon: <DollarSign size={22} />, label: 'Assinatura', page: 'membership' },
   ];
 
   const handleNavigation = (page: string | null) => {
     if (page && onNavigate) {
-      onNavigate(page as 'home' | 'cats');
+      onNavigate(page as 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership');
     }
   };
 
@@ -63,7 +64,7 @@ const AppSidebar = ({ onNavigate }: AppSidebarProps) => {
                   icon={item.icon}
                   label={item.label}
                   path="#"
-                  active={item.page === 'cats'} // Highlight the active page
+                  active={item.page === currentPage} // Highlight the active page
                 />
               </li>
             ))}
