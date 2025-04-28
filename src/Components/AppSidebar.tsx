@@ -8,6 +8,7 @@ import {
   SidebarNavItem,
   SidebarFooter,
   SidebarTrigger,
+  useSidebar
 } from './Sidebar';
 import { ChevronRight, Home, Cat, Camera, BarChart2, FileText, DollarSign, Star } from 'lucide-react';
 
@@ -18,8 +19,12 @@ interface CatEntry {
   imageUrl: string;
 }
 
-const AppSidebar = () => {
-  // Mock data for demonstration
+interface AppSidebarProps {
+  onNavigate?: (page: 'home' | 'cats') => void;
+}
+
+const AppSidebar = ({ onNavigate }: AppSidebarProps) => {
+  // Mock data
   const markedCats: CatEntry[] = [
     { id: '0001', name: 'Pompeu1', age: 10, imageUrl: '/api/placeholder/40/40' },
     { id: '0002', name: 'Pompeu2', age: 10, imageUrl: '/api/placeholder/40/40' },
@@ -28,13 +33,19 @@ const AppSidebar = () => {
   ];
 
   const menuItems = [
-    { icon: <Home size={22} />, label: 'Inicio', path: '/' },
-    { icon: <Cat size={22} />, label: 'Gatos', path: '/gatos' },
-    { icon: <Camera size={22} />, label: 'Câmeras', path: '/cameras' },
-    { icon: <BarChart2 size={22} />, label: 'Estatísticas', path: '/estatisticas' },
-    { icon: <FileText size={22} />, label: 'Relatórios', path: '/relatorios' },
-    { icon: <DollarSign size={22} />, label: 'Assinatura', path: '/assinatura' },
+    { icon: <Home size={22} />, label: 'Inicio', page: 'home' },
+    { icon: <Cat size={22} />, label: 'Gatos', page: 'cats' },
+    { icon: <Camera size={22} />, label: 'Câmeras', page: null },
+    { icon: <BarChart2 size={22} />, label: 'Estatísticas', page: null },
+    { icon: <FileText size={22} />, label: 'Relatórios', page: null },
+    { icon: <DollarSign size={22} />, label: 'Assinatura', page: null },
   ];
+
+  const handleNavigation = (page: string | null) => {
+    if (page && onNavigate) {
+      onNavigate(page as 'home' | 'cats');
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -47,13 +58,14 @@ const AppSidebar = () => {
           {/* Main Navigation */}
           <ul className="py-2">
             {menuItems.map((item, index) => (
-              <SidebarNavItem
-                key={index}
-                icon={item.icon}
-                label={item.label}
-                path={item.path}
-                active={index === 0} // Assuming first item is active for demo
-              />
+              <li key={index} onClick={() => handleNavigation(item.page)}>
+                <SidebarNavItem
+                  icon={item.icon}
+                  label={item.label}
+                  path="#"
+                  active={item.page === 'cats'} // Highlight the active page
+                />
+              </li>
             ))}
           </ul>
 
@@ -145,8 +157,5 @@ const QuickViewSection = ({ markedCats }: { markedCats: CatEntry[] }) => {
     </div>
   );
 };
-
-// Import at the top to make it available in the component
-import { useSidebar } from './Sidebar/SidebarProvider';
 
 export default AppSidebar;

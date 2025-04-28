@@ -12,7 +12,7 @@ const Header = () => {
   
   return (
     <header className="bg-black h-16 flex items-center justify-between px-6 border-b border-gray-800">
-      {/* Search bar */}
+
       <div className="relative w-1/2 max-w-lg">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
         <Input
@@ -23,7 +23,6 @@ const Header = () => {
         />
       </div>
       
-      {/* Notification and profile */}
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon" className="relative text-gray-300 hover:text-white hover:bg-gray-800">
           <Bell size={20} />
