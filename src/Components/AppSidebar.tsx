@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Sidebar,
   SidebarProvider,
@@ -25,6 +26,8 @@ interface AppSidebarProps {
 }
 
 const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
+  const navigate = useNavigate();
+  
   // Mock data
   const markedCats: CatEntry[] = [
     { id: '0001', name: 'Pompeu1', age: 10, imageUrl: '/api/placeholder/40/40' },
@@ -34,18 +37,19 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
   ];
 
   const menuItems = [
-    { icon: <Home size={22} />, label: 'Inicio', page: 'home' },
-    { icon: <Cat size={22} />, label: 'Gatos', page: 'cats' },
-    { icon: <Camera size={22} />, label: 'Câmeras', page: 'cameras' },
-    { icon: <BarChart2 size={22} />, label: 'Estatísticas', page: 'stats' },
-    { icon: <FileText size={22} />, label: 'Relatórios', page: 'reports' },
-    { icon: <DollarSign size={22} />, label: 'Assinatura', page: 'membership' },
+    { icon: <Home size={22} />, label: 'Inicio', page: 'home', path: '/home' },
+    { icon: <Cat size={22} />, label: 'Gatos', page: 'cats', path: '/cats' },
+    { icon: <Camera size={22} />, label: 'Câmeras', page: 'cameras', path: '/cameras' },
+    { icon: <BarChart2 size={22} />, label: 'Estatísticas', page: 'stats', path: '/stats' },
+    { icon: <FileText size={22} />, label: 'Relatórios', page: 'reports', path: '/reports' },
+    { icon: <DollarSign size={22} />, label: 'Assinatura', page: 'membership', path: '/membership' },
   ];
 
-  const handleNavigation = (page: string | null) => {
-    if (page && onNavigate) {
+  const handleNavigation = (page: string, path: string) => {
+    if (onNavigate) {
       onNavigate(page as 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership');
     }
+    navigate(path);
   };
 
   return (
@@ -57,18 +61,18 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
         
         <SidebarContent>
           {/* Main Navigation */}
-          <ul className="py-2">
+          <div className="py-2">
             {menuItems.map((item, index) => (
-              <li key={index} onClick={() => handleNavigation(item.page)}>
-                <SidebarNavItem
-                  icon={item.icon}
-                  label={item.label}
-                  path="#"
-                  active={item.page === currentPage} // Highlight the active page
-                />
-              </li>
+              <SidebarNavItem
+                key={index}
+                icon={item.icon}
+                label={item.label}
+                path={item.path}
+                active={item.page === currentPage}
+                onClick={() => handleNavigation(item.page, item.path)}
+              />
             ))}
-          </ul>
+          </div>
 
           {/* Quick View Section */}
           <QuickViewSection markedCats={markedCats} />
@@ -108,6 +112,7 @@ const LogoSection = () => {
 // Quick View Section Component
 const QuickViewSection = ({ markedCats }: { markedCats: CatEntry[] }) => {
   const { collapsed } = useSidebar();
+  const navigate = useNavigate();
   
   return (
     <div className="mt-4">
@@ -122,38 +127,40 @@ const QuickViewSection = ({ markedCats }: { markedCats: CatEntry[] }) => {
         icon={collapsed ? <Star size={22} /> : undefined}
         defaultExpanded={true}
       >
-        {markedCats.map((cat) => (
-          <a
-            key={cat.id}
-            href={`/gatos/${cat.id}`}
-            className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors"
-          >
-            <img
-              src="/public/imgs/cat_sample.jpg"
-              alt={cat.name}
-              className="w-8 h-8 rounded-full mr-3 object-cover"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
-                {cat.name}
-              </p>
-              <p className="text-xs text-gray-400 truncate">
-                Macho de {cat.age} anos
-              </p>
-              <p className="text-xs text-gray-500 truncate">
-                CID: {cat.id}
-              </p>
+        <div className="space-y-1">
+          {markedCats.map((cat) => (
+            <div
+              key={cat.id}
+              className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
+              onClick={() => navigate(`/gatos/${cat.id}`)}
+            >
+              <img
+                src="/public/imgs/cat_sample.jpg"
+                alt={cat.name}
+                className="w-8 h-8 rounded-full mr-3 object-cover"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {cat.name}
+                </p>
+                <p className="text-xs text-gray-400 truncate">
+                  Macho de {cat.age} anos
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  CID: {cat.id}
+                </p>
+              </div>
             </div>
-          </a>
-        ))}
-        
-        <a
-          href="/gatos/marcados"
-          className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors text-gray-400"
-        >
-          <Star size={16} className="mr-2" />
-          <span className="text-sm">Ver mais gatos em Marcados</span>
-        </a>
+          ))}
+          
+          <div
+            className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors text-gray-400 cursor-pointer"
+            onClick={() => navigate('/gatos/marcados')}
+          >
+            <Star size={16} className="mr-2" />
+            <span className="text-sm">Ver mais gatos em Marcados</span>
+          </div>
+        </div>
       </SidebarGroup>
     </div>
   );

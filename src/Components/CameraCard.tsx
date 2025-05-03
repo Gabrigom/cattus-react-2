@@ -1,23 +1,30 @@
 import { useState } from 'react';
 import { Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CameraCardProps {
   id: string;
   name: string;
   imageUrl: string;
   onClick?: () => void;
+
 }
 
-const CameraCard = ({ id, name, imageUrl, onClick }: CameraCardProps) => {
+const CameraCard = ({ id, name, imageUrl }: CameraCardProps) => {
   const [isHovering, setIsHovering] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    navigate(`/streaming/${id}`);
+  };
   
   return (
     <div 
       className="relative rounded-md overflow-hidden cursor-pointer"
-      style={{ width: '100%', height: '200px' }}
+      style={{ width: '100%', height: '160px' }}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      onClick={onClick}
+      onClick={handleClick}
     >
       {/* Camera thumbnail */}
       <div className="h-full w-full bg-gray-800 overflow-hidden">

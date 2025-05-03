@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './Components/Layout';
 import HomePage from './Pages/HomePage';
 import CatsView from './Pages/CatsView';
 import CamerasView from './Pages/CamerasView';
+import Streaming from './Pages/Streaming';
 import Stats from './Pages/Stats';
 import Reports from './Pages/Reports';
 import Membership from './Pages/Membership';
@@ -14,29 +16,28 @@ function App() {
     setCurrentPage(page);
   };
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage />;
-      case 'cats':
-        return <CatsView />;
-      case 'cameras':
-        return <CamerasView />;
-      case 'stats':
-        return <Stats />;
-      case 'reports':
-        return <Reports />;
-      case 'membership':
-        return <Membership />;
-      default:
-        return <HomePage />;
-    }
-  };
-
   return (
-    <Layout onNavigate={navigateTo} currentPage={currentPage}>
-      {renderPage()}
-    </Layout>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route 
+          path="/*" 
+          element={
+            <Layout currentPage={currentPage} onNavigate={navigateTo}>
+              <Routes>
+                <Route path="home" element={<HomePage />} />
+                <Route path="cats" element={<CatsView />} />
+                <Route path="cameras" element={<CamerasView />} />
+                <Route path="stats" element={<Stats />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="membership" element={<Membership />} />
+                <Route path="streaming/:id" element={<Streaming />} />
+              </Routes>
+            </Layout>
+          } 
+        />
+      </Routes>
+    </Router>
   );
 }
 

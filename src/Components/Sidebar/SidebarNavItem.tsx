@@ -6,27 +6,27 @@ interface SidebarNavItemProps {
   label: string;
   path: string;
   active?: boolean;
+  onClick?: () => void;
 }
 
 export function SidebarNavItem({ 
   icon, 
   label, 
   path, 
-  active = false 
+  active = false,
+  onClick
 }: SidebarNavItemProps) {
   const { collapsed } = useSidebar();
 
   return (
-    <li>
-      <a
-        href={path}
-        className={`flex items-center py-3 px-4 hover:bg-gray-800 transition-colors ${
-          active ? 'bg-gray-800' : ''
-        }`}
-      >
-        <span className={collapsed ? '' : 'mr-3'}>{icon}</span>
-        {!collapsed && <span>{label}</span>}
-      </a>
-    </li>
+    <div 
+      className={`flex items-center py-3 px-4 hover:bg-gray-800 transition-colors cursor-pointer ${
+        active ? 'bg-gray-800' : ''
+      }`}
+      onClick={onClick}
+    >
+      <span className={collapsed ? '' : 'mr-3'}>{icon}</span>
+      {!collapsed && <span>{label}</span>}
+    </div>
   );
 }
