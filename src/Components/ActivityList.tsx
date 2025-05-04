@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { Button } from '@/Components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -13,6 +14,7 @@ export interface ActivityItem {
     time: string;
   };
   metadata?: Record<string, string>;
+  catId?: string; // Added catId to link to cat profile
   onClick?: () => void;
 }
 
@@ -32,12 +34,25 @@ const ActivityList = ({
   emptyMessage = "Não há atividades para exibir"
 }: ActivityListProps) => {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const navigate = useNavigate();
 
-  const toggleExpand = (itemId: string) => {
+  const toggleExpand = (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
     setExpandedItems(prev => ({
       ...prev,
       [itemId]: !prev[itemId]
     }));
+  };
+
+  const handleItemClick = (item: ActivityItem) => {
+    if (item.onClick) {
+      item.onClick();
+    } else if (onItemClick) {
+      onItemClick(item);
+    } else if (item.catId) {
+      // Navigate to cat profile if catId is available
+      navigate(`/cats/${item.catId}`);
+    }
   };
 
   return (
@@ -52,7 +67,11 @@ const ActivityList = ({
         <div className="divide-y divide-gray-800">
           {items.length > 0 ? (
             items.map((item, index) => (
-              <div key={`${item.id}-${index}`} className="bg-[#1A1B21]">
+              <div 
+                key={`${item.id}-${index}`} 
+                className="bg-[#1A1B21] cursor-pointer"
+                onClick={() => handleItemClick(item)}
+              >
                 <div className="p-3">
                   <div className="flex items-start">
                     <div className="relative mr-3">
@@ -74,7 +93,7 @@ const ActivityList = ({
                             variant="ghost" 
                             size="icon" 
                             className="h-6 w-6 text-gray-400"
-                            onClick={() => toggleExpand(item.id)}
+                            onClick={(e) => toggleExpand(e, item.id)}
                           >
                             {expandedItems[item.id] ? (
                               <ChevronUp size={16} />
@@ -96,8 +115,8 @@ const ActivityList = ({
                   <div className="px-3 pb-3 text-sm text-gray-300">
                     <div className="ml-13 pl-13">
                       <p className="mb-1">Última aparição: {item.timestamp.date} às {item.timestamp.time}</p>
-                      <p className="mb-1">Estado: Saudável</p>
-                      <p>Localização: Área de descanso</p>
+                      <p className="mb-1">Estado: {item.metadata?.status || 'Saudável'}</p>
+                      <p>Localização: {item.metadata?.location || 'Área de descanso'}</p>
                     </div>
                   </div>
                 )}

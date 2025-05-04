@@ -17,6 +17,7 @@ interface CatEntry {
   id: string;
   name: string;
   age: number;
+  gender: string;
   imageUrl: string;
 }
 
@@ -30,10 +31,10 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
   
   // Mock data
   const markedCats: CatEntry[] = [
-    { id: '0001', name: 'Pompeu1', age: 10, imageUrl: '/api/placeholder/40/40' },
-    { id: '0002', name: 'Pompeu2', age: 10, imageUrl: '/api/placeholder/40/40' },
-    { id: '0003', name: 'Pompeu3', age: 10, imageUrl: '/api/placeholder/40/40' },
-    { id: '0004', name: 'Pompeu4', age: 10, imageUrl: '/api/placeholder/40/40' },
+    { id: '0001', name: 'Pompeu', age: 10, gender: 'Macho', imageUrl: '/public/imgs/cat_sample.jpg' },
+    { id: '0002', name: 'Amora', age: 5, gender: 'Fêmea', imageUrl: '/public/imgs/cat_sample.jpg' },
+    { id: '0003', name: 'Frederico', age: 7, gender: 'Macho', imageUrl: '/public/imgs/cat_sample.jpg' },
+    { id: '0004', name: 'Luna', age: 3, gender: 'Fêmea', imageUrl: '/public/imgs/cat_sample.jpg' },
   ];
 
   const menuItems = [
@@ -50,6 +51,10 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
       onNavigate(page as 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership');
     }
     navigate(path);
+  };
+
+  const handleCatClick = (catId: string) => {
+    navigate(`/cats/${catId}`);
   };
 
   return (
@@ -75,7 +80,10 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
           </div>
 
           {/* Quick View Section */}
-          <QuickViewSection markedCats={markedCats} />
+          <QuickViewSection 
+            markedCats={markedCats} 
+            onCatClick={handleCatClick}
+          />
         </SidebarContent>
         
         <SidebarFooter>
@@ -110,9 +118,13 @@ const LogoSection = () => {
 };
 
 // Quick View Section Component
-const QuickViewSection = ({ markedCats }: { markedCats: CatEntry[] }) => {
+interface QuickViewSectionProps {
+  markedCats: CatEntry[];
+  onCatClick: (catId: string) => void;
+}
+
+const QuickViewSection = ({ markedCats, onCatClick }: QuickViewSectionProps) => {
   const { collapsed } = useSidebar();
-  const navigate = useNavigate();
   
   return (
     <div className="mt-4">
@@ -132,7 +144,7 @@ const QuickViewSection = ({ markedCats }: { markedCats: CatEntry[] }) => {
             <div
               key={cat.id}
               className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
-              onClick={() => navigate(`/gatos/${cat.id}`)}
+              onClick={() => onCatClick(cat.id)}
             >
               <img
                 src="/public/imgs/cat_sample.jpg"
@@ -144,7 +156,7 @@ const QuickViewSection = ({ markedCats }: { markedCats: CatEntry[] }) => {
                   {cat.name}
                 </p>
                 <p className="text-xs text-gray-400 truncate">
-                  Macho de {cat.age} anos
+                  {cat.gender} de {cat.age} anos
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   CID: {cat.id}
@@ -155,7 +167,7 @@ const QuickViewSection = ({ markedCats }: { markedCats: CatEntry[] }) => {
           
           <div
             className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors text-gray-400 cursor-pointer"
-            onClick={() => navigate('/gatos/marcados')}
+            onClick={() => onCatClick('marked')}
           >
             <Star size={16} className="mr-2" />
             <span className="text-sm">Ver mais gatos em Marcados</span>

@@ -8,6 +8,7 @@ import Streaming from './Pages/Streaming';
 import Stats from './Pages/Stats';
 import Reports from './Pages/Reports';
 import Membership from './Pages/Membership';
+import CatData from './Pages/CatData';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership'>('cameras');
@@ -27,6 +28,7 @@ function App() {
               <Routes>
                 <Route path="home" element={<HomePage />} />
                 <Route path="cats" element={<CatsView />} />
+                <Route path="cats/:id" element={<CatData />} /> {/* Add the new CatData route */}
                 <Route path="cameras" element={<CamerasView />} />
                 <Route path="stats" element={<Stats />} />
                 <Route path="reports" element={<Reports />} />

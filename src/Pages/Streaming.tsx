@@ -152,18 +152,23 @@ const Streaming = () => {
   };
 
   // Convert cat activities to the format expected by ActivityList
-  const formatActivities = (): ActivityItem[] => {
-    return catActivities.map(cat => ({
-      id: cat.id,
-      title: cat.name,
-      subtitle: `${cat.gender} · ${cat.age} anos`,
-      imageUrl: cat.imageUrl,
-      timestamp: {
-        date: cat.date,
-        time: cat.time
-      }
-    }));
-  };
+const formatActivities = (): ActivityItem[] => {
+  return catActivities.map(cat => ({
+    id: cat.id,
+    title: cat.name,
+    subtitle: `${cat.gender} · ${cat.age} anos`,
+    imageUrl: cat.imageUrl,
+    timestamp: {
+      date: cat.date,
+      time: cat.time
+    },
+    catId: cat.id, // Make sure to include the catId for navigation
+    metadata: {
+      status: 'Saudável',
+      location: 'Área de descanso'
+    }
+  }));
+};
 
   const goBack = () => {
     navigate('/cameras');

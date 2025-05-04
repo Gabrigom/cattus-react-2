@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 type CatStatus = 'healthy' | 'attention' | 'critical';
 
@@ -38,10 +39,12 @@ const CatCard = ({
   onMarkToggle
 }: CatCardProps) => {
   const [isMarked, setIsMarked] = useState(initialMarked);
+  const navigate = useNavigate();
   
   const statusColor = getStatusColor(status);
   
-  const handleMarkToggle = () => {
+  const handleMarkToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the card click from triggering
     const newMarkedState = !isMarked;
     setIsMarked(newMarkedState);
     if (onMarkToggle) {
@@ -49,14 +52,19 @@ const CatCard = ({
     }
   };
 
+  const handleCardClick = () => {
+    navigate(`/cats/${id}`);
+  };
+
   return (
     <div 
-      className="relative rounded-md overflow-hidden" 
+      className="relative rounded-md overflow-hidden cursor-pointer" 
       style={{ 
         width: '190px', 
         height: '250px',
         border: `2px solid ${statusColor}`
       }}
+      onClick={handleCardClick}
     >
       {/* Status indicator circle */}
       <div 
