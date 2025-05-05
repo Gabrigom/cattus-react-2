@@ -23,11 +23,6 @@ export const getData = async <T>(path: string, id: string = ''): Promise<T> => {
             throw new Error("Sessão expirada, faça login novamente");
         }
 
-        if (!response.ok) {
-            toast.error("Estamos enfrentando alguns problemas, tente novamente mais tarde");
-            throw new Error("Estamos enfrentando alguns problemas, tente novamente mais tarde");
-        }
-
         const data = await response.json();
         return (data.result || data) as T;
     } catch (error) {

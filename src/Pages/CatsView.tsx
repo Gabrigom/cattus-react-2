@@ -5,7 +5,6 @@ import CatViewTooltip from '@/Components/CatViewTooltip';
 import { Button } from '@/Components/ui/button';
 import { Filter } from 'lucide-react';
 
-// Cat data types
 type CatStatus = 'healthy' | 'attention' | 'critical';
 
 interface Cat {
@@ -19,7 +18,6 @@ interface Cat {
 }
 
 const CatsView = () => {
-  // State for filter dialog
   const [filterOpen, setFilterOpen] = useState(false);
   
   // Dados mockados
@@ -33,18 +31,15 @@ const CatsView = () => {
     marked: index % 4 === 0
   })));
 
-  // Handle marking/unmarking cats
   const handleMarkToggle = (id: string, marked: boolean) => {
     setCats(cats.map(cat => 
       cat.id === id ? { ...cat, marked } : cat
     ));
   };
 
-  // Handle applying filters
   const handleApplyFilters = (selectedFilters: Record<string, string[]>) => {
     console.log('Applied filters:', selectedFilters);
-    // Here you would filter the cats based on the selected filters
-    // This is just a placeholder for the actual filtering logic
+    // Placeholder para o filtro de gatos
   };
 
   return (
