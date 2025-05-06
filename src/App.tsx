@@ -4,12 +4,14 @@ import Cookies from 'js-cookie';
 import Layout from './Components/Layout';
 import HomePage from './Pages/HomePage';
 import CatsView from './Pages/CatsView';
+import CatData from './Pages/CatData';
+import CatAdd from './Pages/CatAdd';
+import CatEdit from './Pages/CatEdit';
 import CamerasView from './Pages/CamerasView';
 import Streaming from './Pages/Streaming';
 import Stats from './Pages/Stats';
 import Reports from './Pages/Reports';
 import Membership from './Pages/Membership';
-import CatData from './Pages/CatData';
 import LoginPage from './Pages/LoginPage';
 import LoadingSplash from './Pages/LoadingSplash';
 
@@ -59,6 +61,8 @@ function App() {
                   <Route path="home" element={<HomePage />} />
                   <Route path="cats" element={<CatsView />} />
                   <Route path="cats/:id" element={<CatData />} />
+                  <Route path="cats/add" element={<CatAdd />} />
+                  <Route path="cats/edit/:id" element={<CatEdit />} />
                   <Route path="cameras" element={<CamerasView />} />
                   <Route path="stats" element={<Stats />} />
                   <Route path="reports" element={<Reports />} />

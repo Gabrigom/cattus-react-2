@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode'; 
 import Cookies from 'js-cookie';
 import CatCard from '@/Components/CatCard';
@@ -21,6 +22,7 @@ const CatsView = () => {
   const [error, setError] = useState<string | null>(null);
   const [markedCats, setMarkedCats] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const navigate = useNavigate();
   
   useEffect(() => {
     const fetchCats = async () => {
@@ -175,6 +177,14 @@ const CatsView = () => {
           <p className="text-gray-400">{cats.length} gatos ao todo</p>
         </div>
         <div className="flex gap-2">
+
+          <Button 
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => navigate('/cats/add')}
+          >
+          ADICIONAR GATO
+          </Button>
+
           <Button 
             variant="outline" 
             className="text-black flex gap-2 items-center"
