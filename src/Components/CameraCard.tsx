@@ -6,8 +6,6 @@ interface CameraCardProps {
   id: string;
   name: string;
   imageUrl: string;
-  onClick?: () => void;
-
 }
 
 const CameraCard = ({ id, name, imageUrl }: CameraCardProps) => {
@@ -32,6 +30,9 @@ const CameraCard = ({ id, name, imageUrl }: CameraCardProps) => {
           src={imageUrl} 
           alt={`Câmera ${name}`}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '';
+          }}
         />
       </div>
       

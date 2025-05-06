@@ -5,174 +5,184 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Badge } from '@/Components/ui/badge';
 import VideoPlayer from '@/Components/VideoPlayer';
 import ActivityList, { ActivityItem } from '@/Components/ActivityList';
+import { CameraService } from '@/Services';
+import { Camera } from '@/Services/types';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
 
-interface CatActivity {
-  id: string;
-  name: string;
-  imageUrl: string;
-  gender: string;
-  age: number;
-  date: string;
-  time: string;
-}
-
-interface CameraDetails {
-  id: string;
-  name: string;
-  description: string;
-  location: string;
-  isActive: boolean;
-  imageUrl: string;
+interface JwtPayload {
+  accessLevel?: number;
+  [key: string]: any;
 }
 
 const Streaming = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isUserAdmin] = useState(false); // Set to true to test admin functionality
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   
   // Camera details state
-  const [camera, setCamera] = useState<CameraDetails>({
-    id: '1',
-    name: 'Câmera 1',
-    description: 'Camera da área de playground para captar gatos socializando',
-    location: 'Playground',
-    isActive: true,
-    imageUrl: '/public/imgs/camera_sample.jpg'
-  });
+  const [camera, setCamera] = useState<Camera | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Mock data for cat activities - added more cats for scrolling example
-  const [catActivities, setCatActivities] = useState<CatActivity[]>([
+  const [catActivities, setCatActivities] = useState<ActivityItem[]>([
     {
       id: '0001',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '18/04',
-      time: '19h05'
+      title: 'Pompeu',
+      subtitle: 'Macho · 10 anos',
+      imageUrl: '/imgs/cat_sample.jpg',
+      timestamp: {
+        date: '18/04',
+        time: '19h05'
+      },
+      catId: '0001',
+      metadata: {
+        status: 'Saudável',
+        location: 'Área de descanso'
+      }
     },
     {
       id: '0002',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '18/04',
-      time: '17h41'
+      title: 'Pompeu',
+      subtitle: 'Macho · 10 anos',
+      imageUrl: '/imgs/cat_sample.jpg',
+      timestamp: {
+        date: '18/04',
+        time: '17h41'
+      },
+      catId: '0002',
+      metadata: {
+        status: 'Saudável',
+        location: 'Área de descanso'
+      }
     },
+    // More mock data...
     {
       id: '0003',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '18/04',
-      time: '15h32'
+      title: 'Pompeu',
+      subtitle: 'Macho · 10 anos',
+      imageUrl: '/imgs/cat_sample.jpg',
+      timestamp: {
+        date: '18/04',
+        time: '15h32'
+      },
+      catId: '0003',
+      metadata: {
+        status: 'Saudável',
+        location: 'Área de descanso'
+      }
     },
     {
       id: '0004',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '18/04',
-      time: '14h45'
+      title: 'Pompeu',
+      subtitle: 'Macho · 10 anos',
+      imageUrl: '/imgs/cat_sample.jpg',
+      timestamp: {
+        date: '18/04',
+        time: '14h45'
+      },
+      catId: '0004',
+      metadata: {
+        status: 'Saudável',
+        location: 'Área de descanso'
+      }
     },
     {
       id: '0005',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '18/04',
-      time: '13h20'
-    },
-    {
-      id: '0006',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '18/04',
-      time: '12h15'
-    },
-    {
-      id: '0007',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '17/04',
-      time: '23h10'
-    },
-    {
-      id: '0008',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '17/04',
-      time: '21h35'
-    },
-    {
-      id: '0009',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '17/04',
-      time: '19h42'
-    },
-    {
-      id: '0010',
-      name: 'Pompeu',
-      imageUrl: '/public/imgs/cat_sample.jpg',
-      gender: 'Macho',
-      age: 10,
-      date: '17/04',
-      time: '16h18'
+      title: 'Pompeu',
+      subtitle: 'Macho · 10 anos',
+      imageUrl: '/imgs/cat_sample.jpg',
+      timestamp: {
+        date: '18/04',
+        time: '13h20'
+      },
+      catId: '0005',
+      metadata: {
+        status: 'Saudável',
+        location: 'Área de descanso'
+      }
     }
   ]);
 
   useEffect(() => {
-    // Here you would fetch camera data and cat activities based on the id
-    console.log(`Fetching data for camera ${id}`);
+    // Check if user is admin
+    const token = Cookies.get('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(token);
+        // Assuming admin level is 1 or higher
+        setIsUserAdmin(decoded.emplyeeAccessLevel && decoded.employeeAccessLevel >= 1);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+
+    // Fetch camera data
+    const fetchCamera = async () => {
+      if (!id) {
+        setError('ID da câmera não fornecido');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const cameraData = await CameraService.getOne(id);
+        setCamera(cameraData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching camera data:', error);
+        setError('Erro ao carregar dados da câmera');
+        setLoading(false);
+      }
+    };
+
+    fetchCamera();
   }, [id]);
 
-  const toggleCameraStatus = () => {
-    if (isUserAdmin) {
+  const toggleCameraStatus = async () => {
+    if (!camera || !isUserAdmin) return;
+
+    try {
+      // Toggle between active (1) and inactive (2)
+      const newStatus = camera.cameraStatus === 1 ? 2 : 1;
+      await CameraService.update(camera._id, {
+        ...camera,
+        cameraStatus: newStatus
+      });
+
+      // Update local state
       setCamera({
         ...camera,
-        isActive: !camera.isActive
+        cameraStatus: newStatus
       });
-    } else {
-      // Show an error or notification that user doesn't have permission
-      console.log('User does not have admin privileges');
+    } catch (error) {
+      console.error('Error updating camera status:', error);
     }
   };
 
-  // Convert cat activities to the format expected by ActivityList
-const formatActivities = (): ActivityItem[] => {
-  return catActivities.map(cat => ({
-    id: cat.id,
-    title: cat.name,
-    subtitle: `${cat.gender} · ${cat.age} anos`,
-    imageUrl: cat.imageUrl,
-    timestamp: {
-      date: cat.date,
-      time: cat.time
-    },
-    catId: cat.id, // Make sure to include the catId for navigation
-    metadata: {
-      status: 'Saudável',
-      location: 'Área de descanso'
-    }
-  }));
-};
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-gray-600 border-t-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
-  const goBack = () => {
-    navigate('/cameras');
-  };
+  if (error || !camera) {
+    return (
+      <div className="p-6">
+        <p className="text-xl text-gray-400">{error || 'Câmera não encontrada.'}</p>
+        <Button 
+          onClick={() => navigate('/cameras')}
+          className="mt-4 bg-green-600 hover:bg-green-700"
+        >
+          Voltar para lista de câmeras
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -184,36 +194,36 @@ const formatActivities = (): ActivityItem[] => {
           {/* Video Player */}
           <div className="mb-4">
             <VideoPlayer 
-              isActive={camera.isActive} 
-              imageUrl={camera.imageUrl} 
-              title={camera.name} 
+              isActive={camera.cameraStatus === 1} 
+              imageUrl={camera.cameraPicture || '/imgs/camera_sample.jpg'} 
+              title={camera.cameraLocation} 
             />
           </div>
 
           {/* Camera Details */}
           <div className="bg-gray-900 rounded-md p-4 mb-4 w-[90%] mx-auto">
             <div className="flex justify-between items-start mb-2">
-              <h2 className="text-2xl font-bold text-white">{camera.name}</h2>
+              <h2 className="text-2xl font-bold text-white">Câmera {camera.cameraLocation}</h2>
               <Button
                 className={`${
-                  camera.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                  camera.cameraStatus === 1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
                 } text-white`}
                 disabled={!isUserAdmin}
                 onClick={toggleCameraStatus}
               >
                 {!isUserAdmin && <Lock size={16} className="mr-2" />}
-                {camera.isActive ? 'DESATIVAR' : 'ATIVAR'}
+                {camera.cameraStatus === 1 ? 'DESATIVAR' : 'ATIVAR'}
               </Button>
             </div>
-            <p className="text-gray-300 mb-2">{camera.description}</p>
+            <p className="text-gray-300 mb-2">{camera.cameraDescription || 'Sem descrição disponível'}</p>
             <div className="flex items-center">
               <span className="text-gray-400 mr-2">Estado:</span>
               <Badge 
                 className={`${
-                  camera.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                  camera.cameraStatus === 1 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
                 } hover:bg-opacity-20`}
               >
-                {camera.isActive ? 'Ativa' : 'Inativa'}
+                {camera.cameraStatus === 1 ? 'Ativa' : 'Inativa'}
               </Badge>
             </div>
           </div>
@@ -223,7 +233,7 @@ const formatActivities = (): ActivityItem[] => {
         <div className="w-full lg:w-80">
           <ActivityList 
             title="Atividades"
-            items={formatActivities()}
+            items={catActivities}
             maxHeight="500px"
           />
         </div>

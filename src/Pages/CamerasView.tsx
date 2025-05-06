@@ -1,32 +1,78 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
 import CameraCard from '@/Components/CameraCard';
 import CatViewFilter from '@/Components/CatViewFilter';
 import CameraViewTooltip from '@/Components/CameraViewTooltip';
 import { Button } from '@/Components/ui/button';
 import { Filter, HelpCircle } from 'lucide-react';
+import { CameraService } from '@/Services';
+import { Camera } from '@/Services/types';
 
-interface Camera {
-  id: string;
-  name: string;
-  imageUrl: string;
+interface JwtPayload {
+  company?: string;
+  [key: string]: any;
 }
 
 const CamerasView = () => {
   // State for filter dialog
   const [filterOpen, setFilterOpen] = useState(false);
+  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Mocked camera data
-  const [cameras] = useState<Camera[]>(Array(12).fill(null).map((_, index) => ({
-    id: `${(index + 1).toString().padStart(2, '0')}`,
-    name: `${index + 1}`,
-    imageUrl: '/public/imgs/camera_sample.jpg' // Using cat sample as placeholder
-  })));
+  useEffect(() => {
+    const fetchCameras = async () => {
+      try {
+        setLoading(true);
+        const token = Cookies.get('token');
+        
+        if (!token) {
+          setError('Você precisa estar autenticado');
+          setLoading(false);
+          return;
+        }
+        
+        const decoded = jwtDecode<JwtPayload>(token);
+        const companyId = decoded.company;
+        
+        if (!companyId) {
+          setError('ID da empresa não encontrado');
+          setLoading(false);
+          return;
+        }
+        
+        const response = await CameraService.getAll(companyId);
+        // Filter out uninitialized cameras (status 0)
+        const initializedCameras = response.filter(camera => camera.cameraStatus !== 0);
+        setCameras(initializedCameras);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching cameras:', error);
+        setError('Erro ao carregar as câmeras');
+        setLoading(false);
+      }
+    };
+    
+    fetchCameras();
+  }, []);
 
   // Handle applying filters
   const handleApplyFilters = (selectedFilters: Record<string, string[]>) => {
     console.log('Applied filters:', selectedFilters);
     // Here you would filter the cameras based on the selected filters
+    // For now, we'll just log the filters
   };
+
+  if (loading) {
+    return <div className="p-6 flex justify-center">
+      <div className="w-8 h-8 border-4 border-gray-600 border-t-white rounded-full animate-spin"></div>
+    </div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="p-6">
@@ -63,11 +109,10 @@ const CamerasView = () => {
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {cameras.map((camera) => (
           <CameraCard
-            key={camera.id}
-            id={camera.id}
-            name={camera.name}
-            imageUrl={camera.imageUrl}
-            onClick={() => console.log(`Opening camera ${camera.name}`)}
+            key={camera._id}
+            id={camera._id}
+            name={camera.cameraLocation}
+            imageUrl={camera.cameraPicture || '/imgs/camera_sample.jpg'}
           />
         ))}
       </div>

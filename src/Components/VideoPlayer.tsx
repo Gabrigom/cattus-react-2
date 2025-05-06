@@ -1,5 +1,6 @@
 import { Button } from '@/Components/ui/button';
 import { Pause, Play, Maximize } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface VideoPlayerProps {
   isActive: boolean;
@@ -9,21 +10,88 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer = ({ isActive, imageUrl, title, className = "" }: VideoPlayerProps) => {
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Reset playing state when active status changes
+  useEffect(() => {
+    if (isActive) {
+      setIsPlaying(true);
+    }
+  }, [isActive]);
+
+  const togglePlay = () => {
+    if (isActive) {
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    const videoContainer = document.getElementById('video-container');
+    if (!videoContainer) return;
+
+    if (!document.fullscreenElement) {
+      videoContainer.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  // Listen for fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   return (
-    <div className={`relative bg-gray-800 rounded-md overflow-hidden aspect-video w-[90%] mx-auto ${className}`}>
+    <div 
+      id="video-container"
+      className={`relative bg-gray-800 rounded-md overflow-hidden aspect-video w-[90%] mx-auto ${className}`}
+    >
       {isActive ? (
         <>
-          {/* This would be replaced with actual video player */}
-          <img 
-            src={imageUrl} 
-            alt={title} 
-            className="w-full h-full object-cover"
-          />
+          {/* This would be replaced with actual video player in a real implementation */}
+          {isPlaying ? (
+            <img 
+              src={imageUrl} 
+              alt={title} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '';
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
+              <Play size={64} className="text-white opacity-50" />
+            </div>
+          )}
+          
           <div className="absolute bottom-4 left-4 flex space-x-3">
-            <Button variant="ghost" size="icon" className="bg-black bg-opacity-40 text-white hover:bg-black hover:bg-opacity-60">
-              <Pause size={20} />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="bg-black bg-opacity-40 text-white hover:bg-black hover:bg-opacity-60"
+              onClick={togglePlay}
+            >
+              {isPlaying ? <Pause size={20} /> : <Play size={20} />}
             </Button>
-            <Button variant="ghost" size="icon" className="bg-black bg-opacity-40 text-white hover:bg-black hover:bg-opacity-60">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="bg-black bg-opacity-40 text-white hover:bg-black hover:bg-opacity-60"
+              onClick={toggleFullscreen}
+            >
               <Maximize size={20} />
             </Button>
           </div>
