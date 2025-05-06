@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/Components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Cat {
@@ -34,6 +35,11 @@ interface CatProfileProps {
 
 const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleEditClick = () => {
+    navigate(`/cats/edit/${cat.id}`);
+  };
 
   // For uploading vaccine documentation
   const handleVaccineUpload = () => {
@@ -235,7 +241,7 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
           </div>
           
           <Button 
-            onClick={() => setIsEditing(true)}
+            onClick={() => handleEditClick()}
             className="px-8 bg-green-600 hover:bg-green-700 text-white"
           >
             EDITAR

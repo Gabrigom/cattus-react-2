@@ -4,7 +4,7 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { HelpCircle } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/Components/ui/radio-group';
+import { Checkbox } from '@/Components/ui/checkbox';
 import { Label } from '@/Components/ui/label';
 
 interface SegmentTwoProps {
@@ -38,6 +38,11 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
     petSize: '',
   };
 
+  // Format cat name, gender and age for display
+  const catName = formData.petName || 'Nome do gato';
+  const catGender = formData.petGender || '';
+  const catAge = calculateAge(formData.petBirth);
+
   // Handle pet characteristics changes
   const handlePetCharacteristicsChange = (field: keyof typeof petCharacteristics, value: string) => {
     const updatedCharacteristics = {
@@ -64,6 +69,11 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
     });
   };
 
+  // Handle castrated checkbox
+  const handleCastratedChange = (checked: boolean) => {
+    handlePetCharacteristicsChange('petCastrated', checked ? 'Sim' : 'Não');
+  };
+
   return (
     <div className="bg-gray-900 rounded-md overflow-hidden">
       <div className="p-3 bg-[#475746] flex justify-between items-center">
@@ -74,138 +84,157 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
       </div>
 
       <div className="p-6 bg-[#324250]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {/* Left column */}
-          <div className="space-y-6">
-            <div>
-              <p className="text-white mb-2">Castrado:</p>
-              <RadioGroup 
-                value={petCharacteristics.petCastrated}
-                onValueChange={(value) => handlePetCharacteristicsChange('petCastrated', value)}
-                className="flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Sim" id="castrated-yes" className="border-white" />
-                  <Label htmlFor="castrated-yes" className="text-white">SIM</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Não" id="castrated-no" className="border-white" />
-                  <Label htmlFor="castrated-no" className="text-white">NÃO</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div>
-              <p className="text-white mb-2">Raça:</p>
-              <Select
-                value={petCharacteristics.petBreed}
-                onValueChange={(value) => handlePetCharacteristicsChange('petBreed', value)}
-              >
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-600">
-                  <SelectItem value="Siamês">Siamês</SelectItem>
-                  <SelectItem value="Persa">Persa</SelectItem>
-                  <SelectItem value="Maine Coon">Maine Coon</SelectItem>
-                  <SelectItem value="Bengal">Bengal</SelectItem>
-                  <SelectItem value="Ragdoll">Ragdoll</SelectItem>
-                  <SelectItem value="Sphynx">Sphynx</SelectItem>
-                  <SelectItem value="British Shorthair">British Shorthair</SelectItem>
-                  <SelectItem value="Abissínio">Abissínio</SelectItem>
-                  <SelectItem value="SRD">SRD (Sem Raça Definida)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <p className="text-white mb-2">Pelagem:</p>
-              <Select
-                value={physicalCharacteristics.furLength}
-                onValueChange={(value) => handlePhysicalCharacteristicsChange('furLength', value)}
-              >
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-600">
-                  <SelectItem value="curto">Curto</SelectItem>
-                  <SelectItem value="médio">Médio</SelectItem>
-                  <SelectItem value="longo">Longo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <p className="text-white mb-2">Cor:</p>
-              <Select
-                value={physicalCharacteristics.furColor}
-                onValueChange={(value) => handlePhysicalCharacteristicsChange('furColor', value)}
-              >
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-600">
-                  <SelectItem value="preta">Preta</SelectItem>
-                  <SelectItem value="branca">Branca</SelectItem>
-                  <SelectItem value="cinza">Cinza</SelectItem>
-                  <SelectItem value="laranja">Laranja</SelectItem>
-                  <SelectItem value="marrom">Marrom</SelectItem>
-                  <SelectItem value="mesclada">Mesclada</SelectItem>
-                </SelectContent>
-              </Select>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left column - Cat image with info */}
+          <div>
+            <div className="bg-[#3c8054] rounded-md overflow-hidden p-4">
+              <h2 className="text-2xl font-bold text-white mb-1">{catName}</h2>
+              <p className="text-white text-sm mb-2">{catGender} • {catAge} anos</p>
+              
+              <div className="h-72 w-full">
+                <img 
+                  src={formData.petPicture || '/imgs/cat_sample.jpg'} 
+                  alt={`Foto de ${catName}`}
+                  className="w-full h-full object-cover rounded-md"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Right column */}
-          <div className="space-y-6">
-            <div>
-              <p className="text-white mb-2">Tamanho:</p>
-              <Select
-                value={petCharacteristics.petSize}
-                onValueChange={(value) => handlePetCharacteristicsChange('petSize', value)}
-              >
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-600">
-                  <SelectItem value="Pequeno">Pequeno</SelectItem>
-                  <SelectItem value="Médio">Médio</SelectItem>
-                  <SelectItem value="Grande">Grande</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Right column - Form fields in a grid */}
+          <div className="col-span-2 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Raça */}
+              <div>
+                <p className="text-white mb-2">Raça</p>
+                <Select
+                  value={petCharacteristics.petBreed}
+                  onValueChange={(value) => handlePetCharacteristicsChange('petBreed', value)}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 text-white border-gray-600">
+                    <SelectItem value="Siamês">Siamês</SelectItem>
+                    <SelectItem value="Persa">Persa</SelectItem>
+                    <SelectItem value="Maine Coon">Maine Coon</SelectItem>
+                    <SelectItem value="Bengal">Bengal</SelectItem>
+                    <SelectItem value="Ragdoll">Ragdoll</SelectItem>
+                    <SelectItem value="Sphynx">Sphynx</SelectItem>
+                    <SelectItem value="British Shorthair">British Shorthair</SelectItem>
+                    <SelectItem value="Abissínio">Abissínio</SelectItem>
+                    <SelectItem value="SRD">SRD (Sem Raça Definida)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Cor predominante */}
+              <div>
+                <p className="text-white mb-2">Cor predominante</p>
+                <Select
+                  value={physicalCharacteristics.furColor}
+                  onValueChange={(value) => handlePhysicalCharacteristicsChange('furColor', value)}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 text-white border-gray-600">
+                    <SelectItem value="preta">Preta</SelectItem>
+                    <SelectItem value="branca">Branca</SelectItem>
+                    <SelectItem value="cinza">Cinza</SelectItem>
+                    <SelectItem value="laranja">Laranja</SelectItem>
+                    <SelectItem value="marrom">Marrom</SelectItem>
+                    <SelectItem value="mesclada">Mesclada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div>
-              <p className="text-white mb-2">Peso (kg):</p>
-              <Input
-                type="number"
-                className="bg-gray-700 border-gray-600 text-white"
-                value={physicalCharacteristics.weight || ''}
-                onChange={(e) => handlePhysicalCharacteristicsChange('weight', Number(e.target.value))}
-                min="0"
-                step="0.1"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Tamanho */}
+              <div>
+                <p className="text-white mb-2">Tamanho (cm)</p>
+                <Input
+                  type="number"
+                  className="bg-gray-700 border-gray-600 text-white"
+                  value={physicalCharacteristics.size || ''}
+                  onChange={(e) => handlePhysicalCharacteristicsChange('size', Number(e.target.value))}
+                  min="0"
+                  step="1"
+                />
+              </div>
+
+              {/* Peso */}
+              <div>
+                <p className="text-white mb-2">Peso (kg)</p>
+                <Input
+                  type="number"
+                  className="bg-gray-700 border-gray-600 text-white"
+                  value={physicalCharacteristics.weight || ''}
+                  onChange={(e) => handlePhysicalCharacteristicsChange('weight', Number(e.target.value))}
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+
+              {/* Pelagem */}
+              <div>
+                <p className="text-white mb-2">Pelagem</p>
+                <Select
+                  value={physicalCharacteristics.furLength}
+                  onValueChange={(value) => handlePhysicalCharacteristicsChange('furLength', value)}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 text-white border-gray-600">
+                    <SelectItem value="curto">Curto</SelectItem>
+                    <SelectItem value="médio">Médio</SelectItem>
+                    <SelectItem value="longo">Longo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div>
-              <p className="text-white mb-2">Cor dos olhos:</p>
-              <Select
-                value={physicalCharacteristics.eyeColor}
-                onValueChange={(value) => handlePhysicalCharacteristicsChange('eyeColor', value)}
-              >
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-600">
-                  <SelectItem value="azul">Azul</SelectItem>
-                  <SelectItem value="verde">Verde</SelectItem>
-                  <SelectItem value="castanho">Castanho</SelectItem>
-                  <SelectItem value="âmbar">Âmbar</SelectItem>
-                  <SelectItem value="heterocromia">Heterocromia (olhos de cores diferentes)</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Cor dos olhos */}
+              <div>
+                <p className="text-white mb-2">Cor dos olhos</p>
+                <Select
+                  value={physicalCharacteristics.eyeColor}
+                  onValueChange={(value) => handlePhysicalCharacteristicsChange('eyeColor', value)}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 text-white border-gray-600">
+                    <SelectItem value="azul">Azul</SelectItem>
+                    <SelectItem value="verde">Verde</SelectItem>
+                    <SelectItem value="castanho">Castanho</SelectItem>
+                    <SelectItem value="âmbar">Âmbar</SelectItem>
+                    <SelectItem value="heterocromia">Heterocromia (olhos de cores diferentes)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Castrado checkbox */}
+              <div className="flex items-center">
+                <div className="flex items-center space-x-2 mt-8">
+                  <Checkbox 
+                    id="castrated" 
+                    checked={petCharacteristics.petCastrated === 'Sim'}
+                    onCheckedChange={handleCastratedChange}
+                    className="bg-white"
+                  />
+                  <Label htmlFor="castrated" className="text-white">Castrado/a?</Label>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 text-sm text-gray-300 text-center">
+          <p>Itens com * são OBRIGATÓRIOS</p>
         </div>
 
         <div className="mt-6 flex justify-end space-x-4">
@@ -226,6 +255,23 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
         </div>
       </div>
     </div>
-  )};
+  );
+};
 
-  export default SegmentTwo;
+// Helper function to calculate age from birth date
+const calculateAge = (birthDate?: Date): number => {
+  if (!birthDate) return 0;
+  
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+};
+
+export default SegmentTwo;

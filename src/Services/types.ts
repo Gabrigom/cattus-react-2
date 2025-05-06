@@ -45,7 +45,7 @@ export interface Animal {
   petStatus: {
       petCurrentStatus: string;
       petOccurrencesQuantity: number;
-      petLastOccurrence: Date;
+      petLastOccurrence: Date | null; 
   };
 }
 
