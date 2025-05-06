@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/Components/ui/button';
-import { ChevronDown, ChevronUp, Upload } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Cat {
   id: string;
@@ -75,6 +74,9 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
                 src={cat.profilePicture} 
                 alt={cat.name} 
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/public/imgs/cat_sample.jpg';
+                }}
               />
             </div>
           </div>
@@ -175,31 +177,51 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
             <div className="space-y-2">
               <h3 className="text-white">Comorbidades</h3>
               <div className="flex flex-wrap gap-2">
-                {cat.comorbidities.map((comorbidity, index) => (
-                  <span 
-                    key={index}
-                    className="px-3 py-1 bg-white text-gray-800 rounded-full text-sm"
-                  >
-                    {comorbidity}
-                  </span>
-                ))}
+                {cat.comorbidities.length > 0 ? (
+                  cat.comorbidities.map((comorbidity, index) => (
+                    <span 
+                      key={index}
+                      className="px-3 py-1 bg-white text-gray-800 rounded-full text-sm"
+                    >
+                      {comorbidity}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-400">Nenhuma comorbidade registrada</span>
+                )}
               </div>
             </div>
             
             <div className="space-y-2">
               <h3 className="text-white">Vacina</h3>
               <div className="p-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-white">
-                    Documento anexado: Vacinacao_Pompeu_13.04.pdf
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    className="text-black border-white bg-white hover:bg-transparent hover:text-white"
-                  >
-                    Visualizar
-                  </Button>
-                </div>
+                {cat.vaccine ? (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-white">
+                      Documento anexado: {cat.vaccine.split('/').pop() || 'Vacinacao.pdf'}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="text-black border-white bg-white hover:bg-transparent hover:text-white"
+                      onClick={() => window.open(cat.vaccine, '_blank')}
+                    >
+                      Visualizar
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-400">
+                      Nenhum documento de vacinação anexado
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="text-black border-white bg-white hover:bg-transparent hover:text-white"
+                      onClick={handleVaccineUpload}
+                    >
+                      Anexar
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -209,7 +231,7 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
         <div className="flex justify-between items-center mt-8">
           <div className="text-xs text-gray-400">
             <p>Cadastrado por: Vinicius Gomes</p>
-            <p>Última alteração: 27-04-2025</p>
+            <p>Última alteração: {new Date().toLocaleDateString('pt-BR')}</p>
           </div>
           
           <Button 

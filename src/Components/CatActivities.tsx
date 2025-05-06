@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+// src/Components/CatActivities.tsx
+import { useState } from 'react';
 import { Button } from '@/Components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { 
@@ -16,150 +17,53 @@ import {
   TableHeader,
   TableRow,
 } from "@/Components/ui/table";
-
-interface CatActivity {
-  id: string;
-  activityType: string;
-  location: string;
-  startDate: string;
-  startTime: string;
-  finishDate: string;
-  finishTime: string;
-  duration: string;
-}
+import { Activity } from '@/Services/types';
 
 interface CatActivitiesProps {
   catId: string;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  activities: Activity[];
 }
 
-const CatActivities = ({ catId, isExpanded, onToggleExpand }: CatActivitiesProps) => {
-  const [activities, setActivities] = useState<CatActivity[]>([]);
-  const [filteredActivities, setFilteredActivities] = useState<CatActivity[]>([]);
+const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: CatActivitiesProps) => {
+  const [filteredActivities, setFilteredActivities] = useState<Activity[]>(activities);
   const [filterType, setFilterType] = useState<string>('all');
   const [dateRange, setDateRange] = useState<{start: string; end: string}>({
     start: '',
     end: ''
   });
 
-  useEffect(() => {
-    // Mock fetch activities data
-    const fetchActivitiesData = async () => {
-      // This would be an API call in a real application
-      const mockActivities: CatActivity[] = [
-        {
-          id: '1',
-          activityType: 'Alimentação',
-          location: 'Área de alimentação',
-          startDate: '01/05/2025',
-          startTime: '08:30',
-          finishDate: '01/05/2025',
-          finishTime: '08:45',
-          duration: '15 min'
-        },
-        {
-          id: '2',
-          activityType: 'Soneca',
-          location: 'Área de descanso',
-          startDate: '01/05/2025',
-          startTime: '09:15',
-          finishDate: '01/05/2025',
-          finishTime: '11:45',
-          duration: '2h 30min'
-        },
-        {
-          id: '3',
-          activityType: 'Banheiro',
-          location: 'Caixa de areia',
-          startDate: '01/05/2025',
-          startTime: '12:10',
-          finishDate: '01/05/2025',
-          finishTime: '12:15',
-          duration: '5 min'
-        },
-        {
-          id: '4',
-          activityType: 'Socialização',
-          location: 'Quintal dos fundos',
-          startDate: '01/05/2025',
-          startTime: '14:30',
-          finishDate: '01/05/2025',
-          finishTime: '15:45',
-          duration: '1h 15min'
-        },
-        {
-          id: '5',
-          activityType: 'Alimentação',
-          location: 'Área de alimentação',
-          startDate: '01/05/2025',
-          startTime: '18:00',
-          finishDate: '01/05/2025',
-          finishTime: '18:20',
-          duration: '20 min'
-        },
-        {
-          id: '6',
-          activityType: 'Soneca',
-          location: 'Área de descanso',
-          startDate: '30/04/2025',
-          startTime: '10:30',
-          finishDate: '30/04/2025',
-          finishTime: '14:15',
-          duration: '3h 45min'
-        },
-        {
-          id: '7',
-          activityType: 'Alimentação',
-          location: 'Área de alimentação',
-          startDate: '30/04/2025',
-          startTime: '07:45',
-          finishDate: '30/04/2025',
-          finishTime: '08:00',
-          duration: '15 min'
-        },
-        {
-          id: '8',
-          activityType: 'Banheiro',
-          location: 'Caixa de areia',
-          startDate: '30/04/2025',
-          startTime: '09:00',
-          finishDate: '30/04/2025',
-          finishTime: '09:05',
-          duration: '5 min'
-        }
-      ];
-      
-      setActivities(mockActivities);
-      setFilteredActivities(mockActivities);
-    };
-
-    fetchActivitiesData();
-  }, [catId]);
-
   // Apply filters when they change
-  useEffect(() => {
+  const applyFilters = () => {
     let filtered = [...activities];
 
     // Apply activity type filter
     if (filterType !== 'all') {
-      filtered = filtered.filter(activity => activity.activityType === filterType);
+      filtered = filtered.filter(activity => 
+        activity.activityData.activityName === filterType
+      );
     }
 
     // Apply date range filter
     if (dateRange.start) {
-      filtered = filtered.filter(activity => new Date(activity.startDate.split('/').reverse().join('-')) >= new Date(dateRange.start));
+      filtered = filtered.filter(activity => 
+        new Date(activity.activityData.activityStart) >= new Date(dateRange.start)
+      );
     }
     
     if (dateRange.end) {
-      filtered = filtered.filter(activity => new Date(activity.startDate.split('/').reverse().join('-')) <= new Date(dateRange.end));
+      filtered = filtered.filter(activity => 
+        new Date(activity.activityData.activityStart) <= new Date(dateRange.end)
+      );
     }
 
     setFilteredActivities(filtered);
-  }, [activities, filterType, dateRange]);
+  };
 
   const handleFilterTypeChange = (value: string) => {
     setFilterType(value);
+    setTimeout(applyFilters, 0);
   };
 
   const handleDateRangeChange = (type: 'start' | 'end', value: string) => {
@@ -167,7 +71,11 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand }: CatActivitiesProps
       ...prev,
       [type]: value
     }));
+    setTimeout(applyFilters, 0);
   };
+
+  // Extract unique activity types for the filter dropdown
+  const activityTypes = ['all', ...new Set(activities.map(a => a.activityData.activityName))];
 
   if (!isExpanded) {
     return (
@@ -204,10 +112,9 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand }: CatActivitiesProps
               </SelectTrigger>
               <SelectContent className="bg-gray-800 text-white border-gray-600">
                 <SelectItem value="all">Todas as atividades</SelectItem>
-                <SelectItem value="Alimentação">Alimentação</SelectItem>
-                <SelectItem value="Soneca">Soneca</SelectItem>
-                <SelectItem value="Banheiro">Banheiro</SelectItem>
-                <SelectItem value="Socialização">Socialização</SelectItem>
+                {activityTypes.filter(type => type !== 'all').map(type => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -232,7 +139,10 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand }: CatActivitiesProps
             <Button 
               variant="ghost" 
               className="ml-2 text-white bg-[#6C1482] hover:bg-[#5a1069]"
-              onClick={() => setDateRange({ start: '', end: '' })}
+              onClick={() => {
+                setDateRange({ start: '', end: '' });
+                setTimeout(applyFilters, 0);
+              }}
             >
               Limpar
             </Button>
@@ -245,7 +155,6 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand }: CatActivitiesProps
             <TableHeader className="bg-[#375a3c]">
               <TableRow>
                 <TableHead className="text-white w-40">Tipo</TableHead>
-                <TableHead className="text-white w-40">Local</TableHead>
                 <TableHead className="text-white w-32">Data de início</TableHead>
                 <TableHead className="text-white w-32">Hora de início</TableHead>
                 <TableHead className="text-white w-32">Data de término</TableHead>
@@ -255,20 +164,25 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand }: CatActivitiesProps
             </TableHeader>
             <TableBody className="bg-[#324250]">
               {filteredActivities.length > 0 ? (
-                filteredActivities.map((activity) => (
-                  <TableRow key={activity.id} className="border-gray-600 hover:bg-[#3c4e5a]">
-                    <TableCell className="text-white">{activity.activityType}</TableCell>
-                    <TableCell className="text-white">{activity.location}</TableCell>
-                    <TableCell className="text-white">{activity.startDate}</TableCell>
-                    <TableCell className="text-white">{activity.startTime}</TableCell>
-                    <TableCell className="text-white">{activity.finishDate}</TableCell>
-                    <TableCell className="text-white">{activity.finishTime}</TableCell>
-                    <TableCell className="text-white">{activity.duration}</TableCell>
-                  </TableRow>
-                ))
+                filteredActivities.map((activity) => {
+                  const startDate = new Date(activity.activityData.activityStart);
+                  const endDate = new Date(activity.activityData.activityEnd);
+                  const duration = calculateDuration(startDate, endDate);
+                  
+                  return (
+                    <TableRow key={activity._id} className="border-gray-600 hover:bg-[#3c4e5a]">
+                      <TableCell className="text-white">{activity.activityData.activityName}</TableCell>
+                      <TableCell className="text-white">{formatDate(startDate)}</TableCell>
+                      <TableCell className="text-white">{formatTime(startDate)}</TableCell>
+                      <TableCell className="text-white">{formatDate(endDate)}</TableCell>
+                      <TableCell className="text-white">{formatTime(endDate)}</TableCell>
+                      <TableCell className="text-white">{duration}</TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4 text-gray-400">
+                  <TableCell colSpan={6} className="text-center py-4 text-gray-400">
                     Nenhuma atividade encontrada
                   </TableCell>
                 </TableRow>
@@ -279,6 +193,28 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand }: CatActivitiesProps
       </div>
     </div>
   );
+};
+
+// Helper functions
+const formatDate = (date: Date): string => {
+  return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+};
+
+const formatTime = (date: Date): string => {
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+};
+
+const calculateDuration = (start: Date, end: Date): string => {
+  const diff = end.getTime() - start.getTime(); // difference in milliseconds
+  
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}min`;
+  } else {
+    return `${minutes} min`;
+  }
 };
 
 export default CatActivities;

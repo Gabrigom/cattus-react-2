@@ -4,36 +4,16 @@ import CatProfile from '@/Components/CatProfile';
 import CatStatus from '@/Components/CatStatus';
 import CatActivities from '@/Components/CatActivities';
 import { Button } from '@/Components/ui/button';
-
-interface Cat {
-  id: string;
-  name: string;
-  gender: string;
-  birthDate: string;
-  age: number;
-  description: string;
-  profilePicture: string;
-  isCastrated: boolean;
-  race: string;
-  color: string;
-  fur: string;
-  size: string;
-  weight: number;
-  personality: string;
-  activityLevel: string;
-  behaviour: string;
-  meowLevel: string;
-  comorbidities: string[];
-  vaccine: string;
-  marked: boolean;
-  status: 'healthy' | 'attention' | 'critical';
-}
+import { AnimalService, ActivityService } from '@/Services';
+import { Animal, Activity } from '@/Services/types';
 
 const CatData = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [cat, setCat] = useState<Cat | null>(null);
+  const [cat, setCat] = useState<Animal | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Section expanded states
   const [sectionsState, setSectionsState] = useState({
@@ -51,40 +31,28 @@ const CatData = () => {
   };
 
   useEffect(() => {
-    // Mock fetch cat data
     const fetchCatData = async () => {
+      if (!id) {
+        setError('ID do gato não fornecido');
+        setLoading(false);
+        return;
+      }
+
       try {
-        // This would be an API call in a real application
-        setTimeout(() => {
-          const mockCat: Cat = {
-            id: id || '0001',
-            name: 'Pompeu',
-            gender: 'Macho',
-            birthDate: '01/02/2022',
-            age: 3,
-            description: 'Um gato gentil porém muito levado, principalmente no período da noite. Pouco social com outros gatos.',
-            profilePicture: '/public/imgs/cat_sample.jpg',
-            isCastrated: true,
-            race: 'Vira-lata',
-            color: 'Preto',
-            fur: 'Espesso',
-            size: 'Grande',
-            weight: 4.5,
-            personality: 'Noturno',
-            activityLevel: 'Moderado',
-            behaviour: 'Manso',
-            meowLevel: 'Baixo',
-            comorbidities: ['Incontinência urinária', 'Obesidade', 'Doença Inflamatória Intestinal', 'Infecção por FIV'],
-            vaccine: '/public/imgs/vaccine_doc.pdf',
-            marked: true,
-            status: 'healthy'
-          };
-          
-          setCat(mockCat);
-          setLoading(false);
-        }, 500);
+        setLoading(true);
+        
+        // Fetch cat data
+        const catData = await AnimalService.getOne(id);
+        setCat(catData);
+        
+        // Fetch cat activities
+        const activitiesData = await ActivityService.getAll(id);
+        setActivities(activitiesData);
+        
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching cat data:', error);
+        setError('Erro ao carregar dados do gato');
         setLoading(false);
       }
     };
@@ -95,15 +63,15 @@ const CatData = () => {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <p className="text-xl text-gray-400">Carregando dados do gato...</p>
+        <div className="w-8 h-8 border-4 border-gray-600 border-t-white rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!cat) {
+  if (error || !cat) {
     return (
       <div className="p-6">
-        <p className="text-xl text-gray-400">Gato não encontrado.</p>
+        <p className="text-xl text-gray-400">{error || 'Gato não encontrado.'}</p>
         <Button 
           onClick={() => navigate('/cats')}
           className="mt-4 bg-green-600 hover:bg-green-700"
@@ -114,12 +82,49 @@ const CatData = () => {
     );
   }
 
+  // Format cat data for CatProfile component
+  const formatCatForProfile = () => {
+    return {
+      id: cat._id,
+      name: cat.petName,
+      gender: cat.petGender,
+      birthDate: formatDate(cat.petBirth),
+      age: calculateAge(cat.petBirth),
+      description: cat.petObs || 'Sem descrição disponível',
+      profilePicture: cat.petPicture || '/public/imgs/cat_sample.jpg',
+      isCastrated: cat.petCharacteristics?.petCastrated === 'Sim',
+      race: cat.petCharacteristics?.petBreed || 'Não especificado',
+      color: cat.physicalCharacteristics?.furColor || 'Não especificado',
+      fur: cat.physicalCharacteristics?.furLength || 'Não especificado',
+      size: cat.petCharacteristics?.petSize || 'Não especificado',
+      weight: cat.physicalCharacteristics?.weight || 0,
+      personality: cat.behavioralCharacteristics?.personality || 'Não especificado',
+      activityLevel: cat.behavioralCharacteristics?.activityLevel || 'Não especificado',
+      behaviour: cat.behavioralCharacteristics?.socialBehavior || 'Não especificado',
+      meowLevel: cat.behavioralCharacteristics?.meow || 'Não especificado',
+      comorbidities: cat.petComorbidities ? cat.petComorbidities.split(',').map(c => c.trim()) : [],
+      vaccine: cat.petVaccines && cat.petVaccines.length > 0 ? cat.petVaccines[0] : '',
+      marked: false, // Mock data since this isn't in API yet
+      status: mapStatus(cat.petStatus?.petCurrentStatus)
+    };
+  };
+
+  const generateReport = () => {
+    try {
+      // Use the ReportService to generate and download a report
+      // This will open the report in a new tab
+      window.open(`http://ec2-52-15-64-33.us-east-2.compute.amazonaws.com/report/${cat._id}`, '_blank');
+    } catch (error) {
+      console.error('Error generating report:', error);
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">Perfil do gato - {cat.name}</h1>
+        <h1 className="text-3xl font-bold text-white">Perfil do gato - {cat.petName}</h1>
         <Button 
-          onClick={() => console.log('Generating report for cat:', cat.id)}
+          onClick={generateReport}
           className="bg-green-600 hover:bg-green-700 text-white"
         >
           GERAR RELATÓRIO
@@ -129,27 +134,61 @@ const CatData = () => {
       <div className="space-y-4">
         {/* Profile Section */}
         <CatProfile 
-          cat={cat}
+          cat={formatCatForProfile()}
           isExpanded={sectionsState.profile}
           onToggleExpand={() => toggleSection('profile')}
         />
         
         {/* Status Section */}
         <CatStatus 
-          catId={cat.id}
+          catId={cat._id}
           isExpanded={sectionsState.status}
           onToggleExpand={() => toggleSection('status')}
         />
         
         {/* Activities Section */}
         <CatActivities 
-          catId={cat.id}
+          catId={cat._id}
           isExpanded={sectionsState.activities}
           onToggleExpand={() => toggleSection('activities')}
+          activities={activities}
         />
       </div>
     </div>
   );
+};
+
+// Helper functions
+const formatDate = (date?: Date): string => {
+  if (!date) return '';
+  const d = new Date(date);
+  return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+};
+
+const calculateAge = (birthDate?: Date): number => {
+  if (!birthDate) return 0;
+  
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+};
+
+const mapStatus = (status?: string): 'healthy' | 'attention' | 'critical' => {
+  if (!status) return 'healthy';
+  
+  switch (status) {
+    case '0': return 'healthy';
+    case '1': return 'attention';
+    case '2': return 'critical';
+    default: return 'healthy';
+  }
 };
 
 export default CatData;

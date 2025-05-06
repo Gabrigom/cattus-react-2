@@ -39,8 +39,15 @@ const Header = () => {
     }
   }, []);
   
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Dispatch a custom event that CatsView will listen for
+    const searchEvent = new CustomEvent('cat-search', {
+      detail: { query: searchQuery }
+    });
+    
+    document.dispatchEvent(searchEvent);
   };
   
   const toggleProfileMenu = () => {
@@ -53,15 +60,17 @@ const Header = () => {
   
   return (
     <header className="bg-black h-16 flex items-center justify-between px-6 border-b border-gray-800">
-      <div className="relative w-1/2 max-w-lg">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-        <Input
-          className="w-full bg-gray-800 border-gray-700 text-white pl-10 rounded-md"
-          placeholder="Pesquisar..."
-          value={searchQuery}
-          onChange={handleSearch}
-        />
-      </div>
+      <form onSubmit={handleSearch}>
+        <div className="relative w-1/2 max-w-lg">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <Input
+            className="w-100 bg-gray-800 border-gray-700 text-white pl-10 rounded-md"
+            placeholder="Pesquisar..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </form>
       
       <div className="flex items-center space-x-4">
         <Notification />

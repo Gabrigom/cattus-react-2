@@ -103,7 +103,7 @@ const CatCard = ({
         <h3 className="font-bold text-sm truncate">{name || "Nome do gato(a)"}</h3>
         <div className="flex justify-between items-center mt-1 text-xs">
           <span>{gender} • {age} anos</span>
-          <span className="text-gray-400">CID: {id}</span>
+          <span className="text-gray-400">CID: {id.substring(0, 4)}</span>
         </div>
       </div>
     </div>
