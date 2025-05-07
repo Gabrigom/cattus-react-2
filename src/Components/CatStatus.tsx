@@ -52,9 +52,7 @@ const CatStatus = ({ catId, isExpanded, onToggleExpand }: CatStatusProps) => {
   const [periods, setPeriods] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    // Mock fetch status data
     const fetchStatusData = async () => {
-      // This would be an API call in a real application
       const mockData: StatusSubsection[] = [
         {
           id: 'food',
@@ -121,7 +119,6 @@ const CatStatus = ({ catId, isExpanded, onToggleExpand }: CatStatusProps) => {
       
       setStatusData(mockData);
       
-      // Initialize periods state
       const initialPeriods: Record<string, number> = {};
       mockData.forEach(item => {
         initialPeriods[item.id] = item.period;
@@ -138,18 +135,17 @@ const CatStatus = ({ catId, isExpanded, onToggleExpand }: CatStatusProps) => {
       [id]: value
     });
     
-    // In a real app, this would trigger a new API call to get updated data for the selected period
     console.log(`Period changed for ${id} to ${value} days`);
   };
 
   const getStatusColor = (status: 'healthy' | 'attention' | 'critical'): string => {
     switch (status) {
       case 'healthy':
-        return '#42AA49'; // Green
+        return '#42AA49';
       case 'attention':
-        return '#FED400'; // Yellow
+        return '#FED400';
       case 'critical':
-        return '#FF0200'; // Red
+        return '#FF0200';
       default:
         return '#42AA49';
     }
@@ -270,11 +266,8 @@ const CatStatus = ({ catId, isExpanded, onToggleExpand }: CatStatusProps) => {
                 <Button 
                   className="bg-green-600 hover:bg-green-700 text-white w-full"
                   onClick={() => {
-                    // In a real app, this would save the current period as the default
-                    // for this activity and cat to the backend
                     console.log(`Fixing period of ${periods[section.id]} days for ${section.title}`);
                     
-                    // Show visual feedback (would be a toast notification in a real app)
                     alert(`Período de ${periods[section.id]} dias fixado para ${section.title}!`);
                   }}
                 >

@@ -13,7 +13,6 @@ const VideoPlayer = ({ isActive, imageUrl, title, className = "" }: VideoPlayerP
   const [isPlaying, setIsPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // Reset playing state when active status changes
   useEffect(() => {
     if (isActive) {
       setIsPlaying(true);
@@ -41,7 +40,6 @@ const VideoPlayer = ({ isActive, imageUrl, title, className = "" }: VideoPlayerP
     }
   };
 
-  // Listen for fullscreen change events
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);

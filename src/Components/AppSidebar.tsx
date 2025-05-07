@@ -29,7 +29,6 @@ interface AppSidebarProps {
 const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
   const navigate = useNavigate();
   
-  // Mock data
   const markedCats: CatEntry[] = [
     { id: '0001', name: 'Pompeu', age: 10, gender: 'Macho', imageUrl: '/public/imgs/cat_sample.jpg' },
     { id: '0002', name: 'Amora', age: 5, gender: 'Fêmea', imageUrl: '/public/imgs/cat_sample.jpg' },
@@ -65,7 +64,6 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
         </SidebarHeader>
         
         <SidebarContent>
-          {/* Main Navigation */}
           <div className="py-2">
             {menuItems.map((item, index) => (
               <SidebarNavItem
@@ -79,7 +77,6 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
             ))}
           </div>
 
-          {/* Quick View Section */}
           <QuickViewSection 
             markedCats={markedCats} 
             onCatClick={handleCatClick}
@@ -96,7 +93,6 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
   );
 };
 
-// Logo Section Component
 const LogoSection = () => {
   const { collapsed } = useSidebar();
   
@@ -117,7 +113,6 @@ const LogoSection = () => {
   );
 };
 
-// Quick View Section Component
 interface QuickViewSectionProps {
   markedCats: CatEntry[];
   onCatClick: (catId: string) => void;

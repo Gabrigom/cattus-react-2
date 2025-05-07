@@ -18,11 +18,11 @@ interface CatCardProps {
 const getStatusColor = (status: CatStatus): string => {
   switch (status) {
     case 'healthy':
-      return '#42AA49'; // Green
+      return '#42AA49';
     case 'attention':
-      return '#FED400'; // Yellow
+      return '#FED400';
     case 'critical':
-      return '#FF0200'; // Red
+      return '#FF0200';
     default:
       return '#42AA49';
   }
@@ -44,7 +44,7 @@ const CatCard = ({
   const statusColor = getStatusColor(status);
   
   const handleMarkToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the card click from triggering
+    e.stopPropagation();
     const newMarkedState = !isMarked;
     setIsMarked(newMarkedState);
     if (onMarkToggle) {
@@ -66,7 +66,6 @@ const CatCard = ({
       }}
       onClick={handleCardClick}
     >
-      {/* Status indicator circle */}
       <div 
         className="absolute top-2 left-2 rounded-full z-10"
         style={{ 
@@ -76,7 +75,6 @@ const CatCard = ({
         }}
       />
       
-      {/* Star button */}
       <button
         onClick={handleMarkToggle}
         className="absolute top-2 right-2 z-10 bg-transparent border-none cursor-pointer"
@@ -89,7 +87,6 @@ const CatCard = ({
         />
       </button>
       
-      {/* Cat image */}
       <div className="h-3/4 w-full bg-gray-300 overflow-hidden">
         <img 
           src={imageUrl} 
@@ -98,7 +95,6 @@ const CatCard = ({
         />
       </div>
       
-      {/* Cat info */}
       <div className="p-2 bg-black text-white">
         <h3 className="font-bold text-sm truncate">{name || "Nome do gato(a)"}</h3>
         <div className="flex justify-between items-center mt-1 text-xs">

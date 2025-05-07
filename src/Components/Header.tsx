@@ -42,7 +42,6 @@ const Header = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Dispatch a custom event that CatsView will listen for
     const searchEvent = new CustomEvent('cat-search', {
       detail: { query: searchQuery }
     });

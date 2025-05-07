@@ -90,7 +90,6 @@ const CatViewFilter = ({
     setSelectedFilters(prev => {
       const updatedCategory = [...(prev[categoryTitle] || [])];
       
-      // Toggle selection
       const index = updatedCategory.indexOf(optionId);
       if (index === -1) {
         updatedCategory.push(optionId);

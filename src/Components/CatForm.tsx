@@ -18,7 +18,6 @@ import {
   HoverCardTrigger,
 } from '@/Components/ui/hover-card';
 
-// JWT Payload interface
 interface JwtPayload {
   company?: string;
   [key: string]: any;
@@ -58,7 +57,6 @@ const defaultFormData: Partial<Animal> = {
   }
 };
 
-// Segment types
 type SegmentType = 'basic' | 'physical' | 'behavioral' | 'medical';
 
 const CatForm = () => {
@@ -76,15 +74,12 @@ const CatForm = () => {
   const [progress, setProgress] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean>(Boolean(id));
 
-  // Fetch cat data if in edit mode and get company ID from token
   useEffect(() => {
-    // Get company ID from token
     const token = Cookies.get('token');
     if (token) {
       try {
         const decoded = jwtDecode<JwtPayload>(token);
         if (decoded.company) {
-          // Set the company in form data
           setFormData(prev => ({
             ...prev,
             company: decoded.company
@@ -103,7 +98,6 @@ const CatForm = () => {
           setFormData(catData);
           setIsEditing(true);
           
-          // Determine which segments are completed
           const completed = {
             basic: Boolean(catData.petName && catData.petGender),
             physical: Boolean(
@@ -134,20 +128,16 @@ const CatForm = () => {
     }
   }, [id]);
 
-  // Calculate form completion progress
   const calculateProgress = (data: Partial<Animal> = formData, segments = completedSegments) => {
-    // Count filled fields (simplified approach)
     let filledFields = 0;
     let totalFields = 0;
 
-    // Basic info fields
     const basicFields = ['petName', 'petGender', 'petPicture', 'petBirth'];
     basicFields.forEach(field => {
       totalFields++;
       if (data[field as keyof typeof data]) filledFields++;
     });
 
-    // Physical characteristics
     if (data.physicalCharacteristics) {
       const physicalFields = ['furColor', 'furLength', 'eyeColor', 'size', 'weight'];
       physicalFields.forEach(field => {
@@ -157,7 +147,6 @@ const CatForm = () => {
       });
     }
 
-    // Behavioral characteristics
     if (data.behavioralCharacteristics) {
       const behavioralFields = ['personality', 'activityLevel', 'socialBehavior', 'meow'];
       behavioralFields.forEach(field => {
@@ -167,22 +156,18 @@ const CatForm = () => {
       });
     }
 
-    // Medical info
-    totalFields += 2; // Vaccines and comorbidities
+    totalFields += 2;
     if (data.petVaccines?.length) filledFields++;
     if (data.petComorbidities) filledFields++;
 
-    // Update progress
     const calculatedProgress = Math.round((filledFields / totalFields) * 100);
     setProgress(calculatedProgress);
   };
 
-  // Handle form data changes
   const handleFormDataChange = (newData: Partial<Animal>, segment: SegmentType) => {
     const updatedData = { ...formData, ...newData };
     setFormData(updatedData);
     
-    // Mark segment as completed (simplified logic - in a real app, validation would be more thorough)
     const isCompleted = 
       segment === 'basic' ? Boolean(updatedData.petName && updatedData.petGender) :
       segment === 'physical' ? Boolean(updatedData.physicalCharacteristics?.furColor) :
@@ -192,25 +177,20 @@ const CatForm = () => {
     const updatedSegments = { ...completedSegments, [segment]: isCompleted };
     setCompletedSegments(updatedSegments);
     
-    // Recalculate progress
     calculateProgress(updatedData, updatedSegments);
   };
 
-  // Save form data
   const saveFormData = async (andContinue: boolean = false) => {
     try {
       setIsLoading(true);
       
-      // For the first segment in CREATE mode, we use POST
       if (activeSegment === 'basic' && !isEditing) {
         const formDataToSubmit = new FormData();
         
-        // Add basic text fields
         if (formData.petName) formDataToSubmit.append('petName', formData.petName);
         if (formData.petGender) formDataToSubmit.append('petGender', formData.petGender);
         if (formData.petObs) formDataToSubmit.append('petObs', formData.petObs);
         
-        // Add company ID
         if (formData.company) {
           formDataToSubmit.append('company', formData.company);
         } else {
@@ -238,35 +218,26 @@ const CatForm = () => {
           }
         }
         
-        // Add petStatus fields
-        formDataToSubmit.append('petStatus.petCurrentStatus', '0');  // Default to healthy
+        formDataToSubmit.append('petStatus.petCurrentStatus', '0'); 
         formDataToSubmit.append('petStatus.petOccurrencesQuantity', '0');
         
-        // Add petBirth (formatted date)
         if (formData.petBirth) {
           const birthDate = new Date(formData.petBirth);
           formDataToSubmit.append('petBirth', birthDate.toISOString().split('T')[0]);
         }
         
-        // Handle file upload for petPicture
         const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
         if (pictureInput?.files?.length) {
           formDataToSubmit.append('petPicture', pictureInput.files[0]);
         }
         
-        // Send the POST request
         const response = await AnimalService.create(formDataToSubmit);
         
         if (response.ok && response._id) {
-          toast.success('Gato cadastrado com sucesso!');
-          
-          // Update our state to edit mode now
-          setIsEditing(true);
-          
-          // Update the URL to reflect edit mode
+          toast.success('Gato cadastrado com sucesso!');       
+          setIsEditing(true);          
           navigate(`/cats/edit/${response._id}`, { replace: true });
           
-          // Also update our component state
           setFormData(prev => ({ ...prev, _id: response._id }));
           
           if (andContinue) {
@@ -278,12 +249,10 @@ const CatForm = () => {
           toast.error(response.message || 'Erro ao cadastrar gato');
         }
       } 
-      // For all other segments OR in EDIT mode, we use PATCH
       else if (id || formData._id) {
         const catId = (id || formData._id) as string;
         let patchData: Partial<Animal> = {};
         
-        // Only include the relevant data for this segment
         if (activeSegment === 'basic') {
           patchData = {
             petName: formData.petName,
@@ -291,11 +260,8 @@ const CatForm = () => {
             petObs: formData.petObs
           };
           
-          // Handle file upload for petPicture separately if needed
           const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
           if (pictureInput?.files?.length) {
-            // In a real app, you'd upload the file and update the URL
-            // Here we're just updating the formData state for simplicity
             patchData.petPicture = URL.createObjectURL(pictureInput.files[0]);
           }
           
@@ -319,29 +285,23 @@ const CatForm = () => {
             petComorbidities: formData.petComorbidities
           };
           
-          // Handle vaccine upload separately if needed
           const vaccineInput = document.getElementById('pet-vaccine') as HTMLInputElement;
           if (vaccineInput?.files?.length) {
-            // In a real app, you'd upload the file and get back a URL to add to petVaccines
-            // Here we're just updating the formData state for simplicity
             patchData.petVaccines = [URL.createObjectURL(vaccineInput.files[0])];
           }
         }
         
-        // Send the PATCH request
         const response = await AnimalService.update(catId, patchData);
         
         if (response.ok) {
           toast.success('Gato atualizado com sucesso!');
           
           if (andContinue) {
-            // Move to next segment
             if (activeSegment === 'basic') setActiveSegment('physical');
             else if (activeSegment === 'physical') setActiveSegment('behavioral');
             else if (activeSegment === 'behavioral') setActiveSegment('medical');
             else navigate('/cats');
           } else {
-            // Return to cats view
             navigate('/cats');
           }
         } else {
@@ -357,9 +317,7 @@ const CatForm = () => {
     }
   };
 
-  // Handle segment change
   const handleSegmentChange = (segment: SegmentType) => {
-    // Only allow changing to other segments after basic info has been saved
     if (segment !== 'basic' && !isEditing) {
       toast.warn('Salve as informações básicas primeiro');
       return;
@@ -398,7 +356,6 @@ const CatForm = () => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Segment Navigation Menu */}
         <div className="w-full md:w-64 bg-gray-900 rounded-md overflow-hidden">
           <div className="p-4 bg-gray-800">
             <h2 className="text-white font-semibold">SEGMENTOS:</h2>
@@ -474,7 +431,6 @@ const CatForm = () => {
           </button>
         </div>
 
-        {/* Form Content */}
         <div className="flex-1">
           {activeSegment === 'basic' && (
             <SegmentOne

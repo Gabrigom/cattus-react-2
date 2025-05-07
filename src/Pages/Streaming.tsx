@@ -20,12 +20,11 @@ const Streaming = () => {
   const navigate = useNavigate();
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   
-  // Camera details state
   const [camera, setCamera] = useState<Camera | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Mock data for cat activities - added more cats for scrolling example
+  // Atividades mockadas ainda
   const [catActivities, setCatActivities] = useState<ActivityItem[]>([
     {
       id: '0001',
@@ -57,7 +56,6 @@ const Streaming = () => {
         location: 'Área de descanso'
       }
     },
-    // More mock data...
     {
       id: '0003',
       title: 'Pompeu',
@@ -106,19 +104,16 @@ const Streaming = () => {
   ]);
 
   useEffect(() => {
-    // Check if user is admin
     const token = Cookies.get('token');
     if (token) {
       try {
         const decoded = jwtDecode<JwtPayload>(token);
-        // Assuming admin level is 1 or higher
         setIsUserAdmin(decoded.emplyeeAccessLevel && decoded.employeeAccessLevel >= 1);
       } catch (error) {
         console.error('Error decoding token:', error);
       }
     }
 
-    // Fetch camera data
     const fetchCamera = async () => {
       if (!id) {
         setError('ID da câmera não fornecido');
@@ -145,14 +140,12 @@ const Streaming = () => {
     if (!camera || !isUserAdmin) return;
 
     try {
-      // Toggle between active (1) and inactive (2)
       const newStatus = camera.cameraStatus === 1 ? 2 : 1;
       await CameraService.update(camera._id, {
         ...camera,
         cameraStatus: newStatus
       });
 
-      // Update local state
       setCamera({
         ...camera,
         cameraStatus: newStatus

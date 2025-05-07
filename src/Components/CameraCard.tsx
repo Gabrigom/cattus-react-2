@@ -24,7 +24,6 @@ const CameraCard = ({ id, name, imageUrl }: CameraCardProps) => {
       onMouseLeave={() => setIsHovering(false)}
       onClick={handleClick}
     >
-      {/* Camera thumbnail */}
       <div className="h-full w-full bg-gray-800 overflow-hidden">
         <img 
           src={imageUrl} 
@@ -36,7 +35,6 @@ const CameraCard = ({ id, name, imageUrl }: CameraCardProps) => {
         />
       </div>
       
-      {/* Play overlay on hover */}
       {isHovering && (
         <div className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center">
           <div className="rounded-full bg-white bg-opacity-80 p-3">
@@ -45,7 +43,6 @@ const CameraCard = ({ id, name, imageUrl }: CameraCardProps) => {
         </div>
       )}
       
-      {/* Camera name */}
       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center">
         <h3 className="font-medium text-sm">Câmera {name}</h3>
       </div>

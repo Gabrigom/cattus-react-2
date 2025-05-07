@@ -20,7 +20,6 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
   onSaveAndContinue,
   isLoading
 }) => {
-  // Initialize behavioral characteristics if they don't exist
   const behavioralCharacteristics = formData.behavioralCharacteristics || {
     personality: '',
     activityLevel: '',
@@ -28,12 +27,10 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
     meow: '',
   };
 
-  // Format cat name, gender and age for display
   const catName = formData.petName || 'Nome do gato';
   const catGender = formData.petGender || '';
   const catAge = calculateAge(formData.petBirth);
 
-  // Handle behavioral characteristics changes
   const handleBehavioralCharacteristicsChange = (field: keyof typeof behavioralCharacteristics, value: string) => {
     const updatedCharacteristics = {
       ...behavioralCharacteristics,
@@ -169,7 +166,6 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
   );
 };
 
-// Helper function to calculate age from birth date
 const calculateAge = (birthDate?: Date): number => {
   if (!birthDate) return 0;
   

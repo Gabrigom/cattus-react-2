@@ -22,7 +22,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
   onSaveAndContinue,
   isLoading
 }) => {
-  // Initialize physical characteristics if they don't exist
   const physicalCharacteristics = formData.physicalCharacteristics || {
     furColor: '',
     furLength: '',
@@ -31,19 +30,16 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
     weight: 0,
   };
 
-  // Initialize pet characteristics if they don't exist
   const petCharacteristics = formData.petCharacteristics || {
     petCastrated: '',
     petBreed: '',
     petSize: '',
   };
 
-  // Format cat name, gender and age for display
   const catName = formData.petName || 'Nome do gato';
   const catGender = formData.petGender || '';
   const catAge = calculateAge(formData.petBirth);
 
-  // Handle pet characteristics changes
   const handlePetCharacteristicsChange = (field: keyof typeof petCharacteristics, value: string) => {
     const updatedCharacteristics = {
       ...petCharacteristics,
@@ -56,7 +52,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
     });
   };
 
-  // Handle physical characteristics changes
   const handlePhysicalCharacteristicsChange = (field: keyof typeof physicalCharacteristics, value: any) => {
     const updatedCharacteristics = {
       ...physicalCharacteristics,
@@ -69,7 +64,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
     });
   };
 
-  // Handle castrated checkbox
   const handleCastratedChange = (checked: boolean) => {
     handlePetCharacteristicsChange('petCastrated', checked ? 'Sim' : 'Não');
   };
@@ -255,7 +249,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
   );
 };
 
-// Helper function to calculate age from birth date
 const calculateAge = (birthDate?: Date): number => {
   if (!birthDate) return 0;
   

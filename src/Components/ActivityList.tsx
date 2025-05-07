@@ -14,7 +14,7 @@ export interface ActivityItem {
     time: string;
   };
   metadata?: Record<string, string>;
-  catId?: string; // Added catId to link to cat profile
+  catId?: string;
   onClick?: () => void;
 }
 
@@ -50,7 +50,6 @@ const ActivityList = ({
     } else if (onItemClick) {
       onItemClick(item);
     } else if (item.catId) {
-      // Navigate to cat profile if catId is available
       navigate(`/cats/${item.catId}`);
     }
   };
@@ -110,7 +109,6 @@ const ActivityList = ({
                   </div>
                 </div>
 
-                {/* Expandable content */}
                 {expandedItems[item.id] && (
                   <div className="px-3 pb-3 text-sm text-gray-300">
                     <div className="ml-13 pl-13">

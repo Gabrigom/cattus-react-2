@@ -19,20 +19,16 @@ const SegmentFour: React.FC<SegmentFourProps> = ({
   onSaveAndContinue,
   isLoading
 }) => {
-  // Format cat name, gender and age for display
   const catName = formData.petName || 'Nome do gato';
   const catGender = formData.petGender || '';
   const catAge = calculateAge(formData.petBirth);
   
-  // State for comorbidities
   const [selectedComorbidities, setSelectedComorbidities] = useState<string[]>(() => {
     return formData.petComorbidities ? formData.petComorbidities.split(',').map(c => c.trim()) : [];
   });
   
-  // Ref for file input
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // List of possible comorbidities
   const comorbidities = [
     'Incontinência Urinária',
     'Obesidade',
@@ -43,7 +39,6 @@ const SegmentFour: React.FC<SegmentFourProps> = ({
     'Linfoma'
   ];
 
-  // Handle comorbidity selection/deselection
   const toggleComorbidity = (comorbidity: string) => {
     setSelectedComorbidities(prev => {
       const isSelected = prev.includes(comorbidity);
@@ -65,15 +60,11 @@ const SegmentFour: React.FC<SegmentFourProps> = ({
     });
   };
 
-  // Handle file input change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real app, you would upload the file to the server here
-      // and get back the URL to store in the pet's vaccination data
       console.log('File selected:', file.name);
       
-      // For now, just add a placeholder URL as a pet vaccine
       const fileUrl = URL.createObjectURL(file);
       onChange({
         ...formData,
@@ -82,7 +73,6 @@ const SegmentFour: React.FC<SegmentFourProps> = ({
     }
   };
 
-  // Handle clicking on the upload area
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -213,7 +203,6 @@ const SegmentFour: React.FC<SegmentFourProps> = ({
   );
 };
 
-// Helper function to calculate age from birth date
 const calculateAge = (birthDate?: Date): number => {
   if (!birthDate) return 0;
   

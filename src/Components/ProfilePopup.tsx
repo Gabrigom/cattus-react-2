@@ -7,7 +7,7 @@ import { AuthService } from '../Services';
 interface ProfilePopupProps {
   isOpen: boolean;
   onClose: () => void;
-  userName?: string; // Add userName prop
+  userName?: string;
 }
 
 const ProfilePopup = ({ isOpen, onClose, userName = 'Usuário' }: ProfilePopupProps) => {

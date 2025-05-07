@@ -33,18 +33,15 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
     end: ''
   });
 
-  // Apply filters whenever the dependencies change
   useEffect(() => {
     let filtered = [...activities];
 
-    // Apply activity type filter
     if (filterType !== 'all') {
       filtered = filtered.filter(activity => 
         activity.activityData.activityName === filterType
       );
     }
 
-    // Apply date range filter
     if (dateRange.start) {
       filtered = filtered.filter(activity => 
         new Date(activity.activityData.activityStart) >= new Date(dateRange.start)
@@ -103,9 +100,7 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
       </div>
 
       <div className="p-4 bg-[#324250]">
-        {/* Filter controls */}
         <div className="flex flex-wrap gap-4 mb-4">
-          {/* Activity type filter */}
           <div className="w-full md:w-1/4">
             <Select value={filterType} onValueChange={handleFilterTypeChange}>
               <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white">
@@ -120,7 +115,6 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
             </Select>
           </div>
           
-          {/* Date range picker */}
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="flex items-center">
               <input 
@@ -147,7 +141,6 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
           </div>
         </div>
 
-        {/* Activities table */}
         <div className="rounded-md border border-gray-700 overflow-hidden">
           <Table>
             <TableHeader className="bg-[#375a3c]">
@@ -193,7 +186,6 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
   );
 };
 
-// Helper functions
 const formatDate = (date: Date): string => {
   return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
 };
@@ -203,7 +195,7 @@ const formatTime = (date: Date): string => {
 };
 
 const calculateDuration = (start: Date, end: Date): string => {
-  const diff = end.getTime() - start.getTime(); // difference in milliseconds
+  const diff = end.getTime() - start.getTime();
   
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));

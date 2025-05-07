@@ -24,34 +24,25 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(formData.petPicture || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Format date for input field
   const formatDateForInput = (date: Date | undefined): string => {
     if (!date) return '';
     const d = new Date(date);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  // Handle form field changes
   const handleChange = (field: keyof typeof formData, value: any) => {
     onChange({ ...formData, [field]: value });
   };
 
-  // Handle file input change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Create a preview URL
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      
-      // In a real app, you would upload the file to the server here
-      // and get back the URL to store in formData
-      // For now, we'll just update the formData with the preview URL
       handleChange('petPicture', previewUrl);
     }
   };
 
-  // Handle clicking on the image area
   const handleImageClick = () => {
     fileInputRef.current?.click();
   };

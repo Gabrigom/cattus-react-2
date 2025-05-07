@@ -4,7 +4,6 @@ import { Button } from '@/Components/ui/button';
 import { Switch } from '@/Components/ui/switch';
 import StatusChange from './StatusChange';
 
-// Types
 type StatusType = 'critical' | 'attention' | 'healthy';
 
 interface NotificationItem {
@@ -25,7 +24,6 @@ const Notification = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   
-  // Mock notifications data
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: '1',
@@ -92,29 +90,24 @@ const Notification = () => {
     }
   ]);
 
-  // Count unread notifications
   const unreadCount = notifications.filter(notif => !notif.isRead).length;
 
-  // Toggle notification panel
   const toggleNotifications = () => {
     setIsOpen(!isOpen);
   };
 
-  // Mark all as read
   const markAllAsRead = () => {
     setNotifications(
       notifications.map(notif => ({ ...notif, isRead: true }))
     );
   };
 
-  // Filter notifications based on showUnreadOnly toggle
   const filteredNotifications = showUnreadOnly
     ? notifications.filter(notif => !notif.isRead)
     : notifications;
 
   return (
     <div className="relative">
-      {/* Notification Bell Button */}
       <Button 
         variant="ghost" 
         size="icon" 
@@ -129,7 +122,6 @@ const Notification = () => {
         )}
       </Button>
 
-      {/* Notification Panel */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-96 bg-gray-900 rounded-md shadow-lg z-50 overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
@@ -144,7 +136,6 @@ const Notification = () => {
             </Button>
           </div>
 
-          {/* Filter toggle */}
           <div className="px-4 py-2 flex items-center justify-between border-b border-gray-800">
             <span className="text-sm text-gray-300">Mostrar não lidos</span>
             <Switch 
@@ -153,7 +144,6 @@ const Notification = () => {
             />
           </div>
 
-          {/* Notifications list */}
           <div className="max-h-96 overflow-y-auto p-2">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map(notification => (

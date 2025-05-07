@@ -15,8 +15,8 @@ interface Cat {
   race: string;
   color: string;
   fur: string;
-  size: string;
-  weight: string;
+  size: number;
+  weight: number;
   personality: string;
   activityLevel: string;
   behaviour: string;

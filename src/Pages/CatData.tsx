@@ -15,14 +15,12 @@ const CatData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Section expanded states
   const [sectionsState, setSectionsState] = useState({
     profile: true,
     status: false,
     activities: false
   });
 
-  // Toggle section expanded state
   const toggleSection = (section: 'profile' | 'status' | 'activities') => {
     setSectionsState({
       ...sectionsState,
@@ -41,11 +39,9 @@ const CatData = () => {
       try {
         setLoading(true);
         
-        // Fetch cat data
         const catData = await AnimalService.getOne(id);
         setCat(catData);
         
-        // Fetch cat activities
         const activitiesData = await ActivityService.getAll(id);
         setActivities(activitiesData);
         
@@ -82,7 +78,6 @@ const CatData = () => {
     );
   }
 
-  // Format cat data for CatProfile component
   const formatCatForProfile = () => {
     return {
       id: cat._id,
@@ -104,15 +99,13 @@ const CatData = () => {
       meowLevel: cat.behavioralCharacteristics?.meow || 'Não especificado',
       comorbidities: cat.petComorbidities ? cat.petComorbidities.split(',').map(c => c.trim()) : [],
       vaccine: cat.petVaccines && cat.petVaccines.length > 0 ? cat.petVaccines[0] : '',
-      marked: false, // Mock data since this isn't in API yet
+      marked: false,
       status: mapStatus(cat.petStatus?.petCurrentStatus)
     };
   };
 
   const generateReport = () => {
     try {
-      // Use the ReportService to generate and download a report
-      // This will open the report in a new tab
       window.open(`http://ec2-52-15-64-33.us-east-2.compute.amazonaws.com/report/${cat._id}`, '_blank');
     } catch (error) {
       console.error('Error generating report:', error);
@@ -132,21 +125,18 @@ const CatData = () => {
       </div>
 
       <div className="space-y-4">
-        {/* Profile Section */}
         <CatProfile 
           cat={formatCatForProfile()}
           isExpanded={sectionsState.profile}
           onToggleExpand={() => toggleSection('profile')}
         />
         
-        {/* Status Section */}
         <CatStatus 
           catId={cat._id}
           isExpanded={sectionsState.status}
           onToggleExpand={() => toggleSection('status')}
         />
         
-        {/* Activities Section */}
         <CatActivities 
           catId={cat._id}
           isExpanded={sectionsState.activities}
@@ -158,7 +148,6 @@ const CatData = () => {
   );
 };
 
-// Helper functions
 const formatDate = (date?: Date): string => {
   if (!date) return '';
   const d = new Date(date);

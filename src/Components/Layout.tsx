@@ -12,7 +12,6 @@ interface LayoutProps {
 const Layout = ({ children, currentPage, onNavigate }: LayoutProps) => {
   const location = useLocation();
   
-  // Update the current page based on the URL
   const getCurrentPageFromPath = (): 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership' => {
     const path = location.pathname.split('/')[1];
     
@@ -30,7 +29,6 @@ const Layout = ({ children, currentPage, onNavigate }: LayoutProps) => {
       case 'membership':
         return 'membership';
       default:
-        // For streaming and other pages, see which section they belong to
         if (path === 'streaming') {
           return 'cameras';
         }

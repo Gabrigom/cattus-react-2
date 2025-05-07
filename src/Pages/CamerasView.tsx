@@ -15,7 +15,6 @@ interface JwtPayload {
 }
 
 const CamerasView = () => {
-  // State for filter dialog
   const [filterOpen, setFilterOpen] = useState(false);
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,8 +42,8 @@ const CamerasView = () => {
         }
         
         const response = await CameraService.getAll(companyId);
-        // Filter out uninitialized cameras (status 0)
         const initializedCameras = response.filter(camera => camera.cameraStatus !== 0);
+
         setCameras(initializedCameras);
         setLoading(false);
       } catch (error) {
@@ -57,11 +56,9 @@ const CamerasView = () => {
     fetchCameras();
   }, []);
 
-  // Handle applying filters
   const handleApplyFilters = (selectedFilters: Record<string, string[]>) => {
     console.log('Applied filters:', selectedFilters);
-    // Here you would filter the cameras based on the selected filters
-    // For now, we'll just log the filters
+    // Placeholder pro filtro
   };
 
   if (loading) {
