@@ -1,5 +1,4 @@
-// src/Components/CatActivities.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/Components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { 
@@ -34,8 +33,8 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
     end: ''
   });
 
-  // Apply filters when they change
-  const applyFilters = () => {
+  // Apply filters whenever the dependencies change
+  useEffect(() => {
     let filtered = [...activities];
 
     // Apply activity type filter
@@ -57,13 +56,12 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
         new Date(activity.activityData.activityStart) <= new Date(dateRange.end)
       );
     }
-
+    
     setFilteredActivities(filtered);
-  };
+  }, [activities, filterType, dateRange]);
 
   const handleFilterTypeChange = (value: string) => {
     setFilterType(value);
-    setTimeout(applyFilters, 0);
   };
 
   const handleDateRangeChange = (type: 'start' | 'end', value: string) => {
@@ -71,12 +69,15 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
       ...prev,
       [type]: value
     }));
-    setTimeout(applyFilters, 0);
   };
 
-  // Extract unique activity types for the filter dropdown
-  const activityTypes = ['all', ...new Set(activities.map(a => a.activityData.activityName))];
+  const resetFilters = () => {
+    setFilterType('all');
+    setDateRange({ start: '', end: '' });
+  };
 
+  const activityTypes = ['all', ...new Set(activities.map(a => a.activityData.activityName))];
+  
   if (!isExpanded) {
     return (
       <div className="bg-gray-900 rounded-md overflow-hidden">
@@ -139,10 +140,7 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
             <Button 
               variant="ghost" 
               className="ml-2 text-white bg-[#6C1482] hover:bg-[#5a1069]"
-              onClick={() => {
-                setDateRange({ start: '', end: '' });
-                setTimeout(applyFilters, 0);
-              }}
+              onClick={resetFilters}
             >
               Limpar
             </Button>

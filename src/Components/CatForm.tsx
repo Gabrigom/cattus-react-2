@@ -12,6 +12,11 @@ import { AnimalService } from '@/Services';
 import { Animal } from '@/Services/types';
 import { HelpCircle } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/Components/ui/hover-card';
 
 // JWT Payload interface
 interface JwtPayload {
@@ -375,14 +380,16 @@ const CatForm = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white">{isEditing ? 'Editar gato' : 'Adicionar gato'}</h1>
-        <Button 
-          variant="outline" 
-          className="text-black"
-          size="icon"
-          onClick={() => navigate('/cats')}
-        >
-          <HelpCircle size={16} />
-        </Button>
+        <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-white hover:bg-transparent">
+                      <HelpCircle size={16} />
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80 bg-gray-700 text-white border-gray-600 p-4">
+                    <p>{isEditing ? 'A edição de gatos permite preencher novos dados ou alterar os existentes' : 'O cadastro de gato possui 4 etapas, porém só a primeira é obrigatória para listar o gato no sistema. As demais podem ser preenchidas posteriormente.'}</p>
+                  </HoverCardContent>
+                </HoverCard>
       </div>
 
       <div className="mb-6">

@@ -184,7 +184,6 @@ const CatStatus = ({ catId, isExpanded, onToggleExpand }: CatStatusProps) => {
           {statusData.map((section, index) => (
             <div key={section.id} className="bg-[#404c5a] p-4">
               <div className="flex justify-between items-center mb-2">
-                {/* Help tooltip */}
                 <HoverCard>
                   <HoverCardTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-white hover:bg-transparent">

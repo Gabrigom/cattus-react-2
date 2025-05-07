@@ -96,7 +96,7 @@ const CatData = () => {
       race: cat.petCharacteristics?.petBreed || 'Não especificado',
       color: cat.physicalCharacteristics?.furColor || 'Não especificado',
       fur: cat.physicalCharacteristics?.furLength || 'Não especificado',
-      size: cat.petCharacteristics?.petSize || 'Não especificado',
+      size: cat.physicalCharacteristics?.size || 0,
       weight: cat.physicalCharacteristics?.weight || 0,
       personality: cat.behavioralCharacteristics?.personality || 'Não especificado',
       activityLevel: cat.behavioralCharacteristics?.activityLevel || 'Não especificado',

@@ -60,9 +60,6 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
     <div className="bg-gray-900 rounded-md overflow-hidden">
       <div className="p-3 bg-[#475746] flex justify-between items-center">
         <h2 className="text-lg font-semibold text-white">Informações básicas e foto de perfil</h2>
-        <Button variant="ghost" size="icon" className="text-white">
-          <HelpCircle size={20} />
-        </Button>
       </div>
 
       <div className="p-6 bg-[#324250]">

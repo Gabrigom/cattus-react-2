@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode'; 
 import Cookies from 'js-cookie';
 import CatCard from '@/Components/CatCard';
@@ -48,10 +48,9 @@ const CatsView = () => {
         const response = await AnimalService.getAll(companyId);
         setCats(response);
         
-        // Initialize mock marked status (random for now)
         const mockMarked: Record<string, boolean> = {};
         response.forEach(cat => {
-          mockMarked[cat._id] = Math.random() > 0.7; // 30% chance of being marked
+          mockMarked[cat._id] = Math.random() > 0.7;
         });
         setMarkedCats(mockMarked);
         
@@ -67,8 +66,6 @@ const CatsView = () => {
   }, []);
 
   useEffect(() => {
-    // You'll need to implement a global state or event system
-    // This is a simplified example
     const searchHandler = (e: CustomEvent) => {
       setSearchQuery(e.detail.query);
       handleSearch(e.detail.query);
@@ -96,7 +93,6 @@ const CatsView = () => {
 
     try {
       setLoading(true);
-      // Fields to search in - adjust these based on your API
       const fields = ['petName', 'petGender', 'petBreed', 'petComorbidities'];
       const results = await AnimalService.search(query, fields);
       setCats(results);
@@ -110,7 +106,6 @@ const CatsView = () => {
 
 
   const handleMarkToggle = (id: string, marked: boolean) => {
-    // Only update the mock state since there's no API endpoint yet
     setMarkedCats(prev => ({
       ...prev,
       [id]: marked
@@ -118,10 +113,7 @@ const CatsView = () => {
   };
 
   const handleApplyFilters = (selectedFilters: Record<string, string[]>) => {
-    // This would be implemented with your search API
-    console.log('Applied filters:', selectedFilters);
-    // For now, just mock filtering based on gender
-    // In the future, implement actual API filtering
+    // console.log('Applied filters:', selectedFilters);
     if (selectedFilters.gender && selectedFilters.gender.length > 0) {
       const token = Cookies.get('token');
       if (!token) return;
@@ -130,17 +122,14 @@ const CatsView = () => {
       const companyId = decoded.company;
       if (!companyId) return;
       
-      // Reset to all cats first
       AnimalService.getAll(companyId).then(allCats => {
-        // Client-side filtering as a fallback until API supports it
         const filtered = allCats.filter(cat => {
-          // Map API gender values to filter values
           const genderMap: Record<string, string> = {
             "Macho": "male",
             "Fêmea": "female"
           };
           
-          const mappedGender = genderMap[cat.petGender] || "unspecified";
+          const mappedGender = genderMap[cat.petGender];
           return selectedFilters.gender.includes(mappedGender);
         });
         
@@ -149,7 +138,6 @@ const CatsView = () => {
     }
   };
 
-  // Function to map Cat Status based on your API data structure
   const mapCatStatus = (status?: string): 'healthy' | 'attention' | 'critical' => {
     if (!status) return 'healthy';
     
@@ -195,7 +183,7 @@ const CatsView = () => {
           </Button>
           
           <CatViewTooltip>
-            <Button variant="outline" className="text-black" size="icon">
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-400 hover:text-white hover:bg-transparent">
               <HelpCircle size={16} />
             </Button>
           </CatViewTooltip>
@@ -208,7 +196,6 @@ const CatsView = () => {
         onApplyFilters={handleApplyFilters}
       />
 
-      {/* Cat cards grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {cats.map((cat) => (
           <CatCard
@@ -228,7 +215,6 @@ const CatsView = () => {
   );
 };
 
-// Helper function to calculate age from birth date
 const getAge = (birthDate?: Date): number => {
   if (!birthDate) return 0;
   

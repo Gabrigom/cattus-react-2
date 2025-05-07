@@ -1,7 +1,7 @@
 import { getData, postDataJSON, postDataFormData, updateData, deleteData } from './api';
 import { Animal, AnimalResponse } from './types';
 
-const getAll = (companyId: string, skip: number = 0, limit: number = 10): Promise<Animal[]> => 
+const getAll = (companyId: string, skip: number = 0, limit: number = 100): Promise<Animal[]> => 
     getData<Animal[]>(`/animal/select-all/${companyId}?skip=${skip}&limit=${limit}`);
 
 const getOne = (id: string): Promise<Animal> => 

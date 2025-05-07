@@ -92,7 +92,7 @@ const CamerasView = () => {
           </Button>
           
           <CameraViewTooltip>
-            <Button variant="outline" className="text-black" size="icon">
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-400 hover:text-white hover:bg-transparent">
               <HelpCircle size={16} />
             </Button>
           </CameraViewTooltip>

@@ -16,7 +16,7 @@ interface Cat {
   color: string;
   fur: string;
   size: string;
-  weight: number;
+  weight: string;
   personality: string;
   activityLevel: string;
   behaviour: string;
@@ -34,16 +34,14 @@ interface CatProfileProps {
 }
 
 const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
-  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   
   const handleEditClick = () => {
     navigate(`/cats/edit/${cat.id}`);
   };
 
-  // For uploading vaccine documentation
+
   const handleVaccineUpload = () => {
-    // In a real application, this would open a file picker
     console.log('Opening file picker for vaccine upload');
   };
 
@@ -81,13 +79,12 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
                 alt={cat.name} 
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/public/imgs/cat_sample.jpg';
+                  (e.target as HTMLImageElement).src = '';
                 }}
               />
             </div>
           </div>
 
-          {/* Middle column - Physical characteristics */}
           <div className="md:w-1/3 space-y-4">
             <h2 className="text-2xl font-bold text-white">{cat.name}</h2>
             
@@ -144,7 +141,7 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
               
               <div className="flex items-center gap-2">
                 <span className="text-gray-400 w-1/3">Tamanho:</span>
-                <span className="text-white">{cat.size}</span>
+                <span className="text-white">{cat.size} cm</span>
               </div>
               
               <div className="flex items-center gap-2">
@@ -154,7 +151,6 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
             </div>
           </div>
 
-          {/* Right columns - Social characteristics and comorbidities */}
           <div className="md:w-1/3 space-y-4">
             <div className="space-y-2">
               <h3 className="text-white">Características sociais</h3>
