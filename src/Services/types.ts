@@ -47,6 +47,7 @@ export interface Animal {
       petOccurrencesQuantity: number;
       petLastOccurrence: Date | null; 
   };
+  petFavorite: boolean;
 }
 
 export interface AnimalResponse extends ApiResponse {

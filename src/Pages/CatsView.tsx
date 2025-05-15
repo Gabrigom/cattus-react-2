@@ -9,6 +9,7 @@ import { Button } from '@/Components/ui/button';
 import { Filter, HelpCircle } from 'lucide-react';
 import { AnimalService } from '@/Services';
 import { Animal } from '@/Services/types';
+import { toast } from 'react-toastify';
 
 interface JwtPayload {
   company?: string;
@@ -46,13 +47,10 @@ const CatsView = () => {
         }
         
         const response = await AnimalService.getAll(companyId);
+        console.log('Fetched cats:', response);
         setCats(response);
         
-        const mockMarked: Record<string, boolean> = {};
-        response.forEach(cat => {
-          mockMarked[cat._id] = Math.random() > 0.7;
-        });
-        setMarkedCats(mockMarked);
+        // setMarkedCats(response.petFavorite);
         
         setLoading(false);
       } catch (error) {
@@ -105,11 +103,16 @@ const CatsView = () => {
   }
 
 
-  const handleMarkToggle = (id: string, marked: boolean) => {
-    setMarkedCats(prev => ({
-      ...prev,
-      [id]: marked
-    }));
+  const handleMarkToggle = async (id: string, marked: boolean) => {
+
+    let patchData = {
+      petFavorite: marked
+    };
+    const response = await AnimalService.update(id, patchData);
+
+    if (response.ok) {
+              toast.success('Marcação atualizada!');
+    }
   };
 
   const handleApplyFilters = (selectedFilters: Record<string, string[]>) => {
@@ -206,7 +209,7 @@ const CatsView = () => {
             age={getAge(cat.petBirth)}
             imageUrl={cat.petPicture || '/public/imgs/cat_sample.jpg'}
             status={mapCatStatus(cat.petStatus?.petCurrentStatus)}
-            initialMarked={markedCats[cat._id] || false}
+            initialMarked={cat.petFavorite}
             onMarkToggle={handleMarkToggle}
           />
         ))}

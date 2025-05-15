@@ -54,7 +54,8 @@ const defaultFormData: Partial<Animal> = {
     petCurrentStatus: '0',
     petOccurrencesQuantity: 0,
     petLastOccurrence: null,
-  }
+  },
+  petFavorite: false
 };
 
 type SegmentType = 'basic' | 'physical' | 'behavioral' | 'medical';
