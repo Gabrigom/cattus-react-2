@@ -25,6 +25,15 @@ const getSickAnimals = (): Promise<any> =>
 const getTotalAnimals = (): Promise<any> => 
     getData<any>('/animal/charts/total-animals');
 
+const getMarkedAnimals = (companyId: string): Promise<Animal[]> => {
+    return getAll(companyId).then(
+        cats => {
+            return cats.filter(cat => cat.petFavorite);
+        }
+    )
+}
+
+
 export default {
     getAll,
     getOne,
@@ -33,5 +42,6 @@ export default {
     remove,
     search,
     getSickAnimals,
-    getTotalAnimals
+    getTotalAnimals,
+    getMarkedAnimals
 };

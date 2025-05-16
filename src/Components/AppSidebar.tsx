@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sidebar,
@@ -12,6 +12,15 @@ import {
   useSidebar
 } from './Sidebar';
 import { ChevronRight, Home, Cat, Camera, BarChart2, FileText, DollarSign, Star } from 'lucide-react';
+import { AnimalService } from '@/Services';
+import { Animal } from '@/Services/types';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+interface JwtPayload {
+  company?: string;
+  [key: string]: any;
+}
 
 interface CatEntry {
   id: string;
@@ -28,14 +37,9 @@ interface AppSidebarProps {
 
 const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
   const navigate = useNavigate();
+  const [markedCats, setMarkedCats] = useState<Animal[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const markedCats: CatEntry[] = [
-    { id: '0001', name: 'Pompeu', age: 10, gender: 'Macho', imageUrl: '/public/imgs/cat_sample.jpg' },
-    { id: '0002', name: 'Amora', age: 5, gender: 'Fêmea', imageUrl: '/public/imgs/cat_sample.jpg' },
-    { id: '0003', name: 'Frederico', age: 7, gender: 'Macho', imageUrl: '/public/imgs/cat_sample.jpg' },
-    { id: '0004', name: 'Luna', age: 3, gender: 'Fêmea', imageUrl: '/public/imgs/cat_sample.jpg' },
-  ];
-
   const menuItems = [
     { icon: <Home size={22} />, label: 'Inicio', page: 'home', path: '/home' },
     { icon: <Cat size={22} />, label: 'Gatos', page: 'cats', path: '/cats' },
@@ -44,6 +48,26 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
     { icon: <FileText size={22} />, label: 'Relatórios', page: 'reports', path: '/reports' },
     { icon: <DollarSign size={22} />, label: 'Assinatura', page: 'membership', path: '/membership' },
   ];
+
+  useEffect(() => {
+    const fetchMarkedCats = async () => {
+      try {
+        const token = Cookies.get('token') || '';
+
+        const decoded = jwtDecode<JwtPayload>(token);
+        const companyId = decoded.company || '';
+
+        const cats = await AnimalService.getMarkedAnimals(companyId)
+        setMarkedCats(cats);
+        setLoading(false);
+      } catch (error) {
+        console.error('Erro ao carregar gatos marcados', error);
+        setLoading(false);
+      }
+    };
+
+    fetchMarkedCats();
+  }, []);
 
   const handleNavigation = (page: string, path: string) => {
     if (onNavigate) {
@@ -79,6 +103,7 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
 
           <QuickViewSection 
             markedCats={markedCats} 
+            loading={loading}
             onCatClick={handleCatClick}
           />
         </SidebarContent>
@@ -113,12 +138,27 @@ const LogoSection = () => {
   );
 };
 
+const calculateAge = (birthDate?: Date): number => {
+  if (!birthDate) return 0;
+  
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+};
 interface QuickViewSectionProps {
-  markedCats: CatEntry[];
+  markedCats: Animal[];
+  loading: boolean;
   onCatClick: (catId: string) => void;
 }
 
-const QuickViewSection = ({ markedCats, onCatClick }: QuickViewSectionProps) => {
+const QuickViewSection = ({ markedCats, loading, onCatClick }: QuickViewSectionProps) => {
   const { collapsed } = useSidebar();
   
   return (
@@ -135,38 +175,55 @@ const QuickViewSection = ({ markedCats, onCatClick }: QuickViewSectionProps) => 
         defaultExpanded={true}
       >
         <div className="space-y-1">
-          {markedCats.map((cat) => (
-            <div
-              key={cat.id}
-              className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
-              onClick={() => onCatClick(cat.id)}
-            >
-              <img
-                src="/public/imgs/cat_sample.jpg"
-                alt={cat.name}
-                className="w-8 h-8 rounded-full mr-3 object-cover"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {cat.name}
-                </p>
-                <p className="text-xs text-gray-400 truncate">
-                  {cat.gender} de {cat.age} anos
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  CID: {cat.id}
-                </p>
-              </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="w-5 h-5 border-2 border-gray-600 border-t-white rounded-full animate-spin"></div>
             </div>
-          ))}
-          
-          <div
-            className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors text-gray-400 cursor-pointer"
-            onClick={() => onCatClick('marked')}
-          >
-            <Star size={16} className="mr-2" />
-            <span className="text-sm">Ver mais gatos em Marcados</span>
-          </div>
+          ) : markedCats.length > 0 ? (
+            <>
+              {markedCats.slice(0, 4).map((cat) => (
+                <div
+                  key={cat._id}
+                  className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
+                  onClick={() => onCatClick(cat._id)}
+                >
+                  <img
+                    src={cat.petPicture || '/imgs/cat_sample.jpg'}
+                    alt={cat.petName}
+                    className="w-8 h-8 rounded-full mr-3 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/imgs/cat_sample.jpg';
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {cat.petName}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">
+                      {cat.petGender} • {calculateAge(cat.petBirth)} anos
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      CID: {cat._id.substring(0, 4)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              
+              {markedCats.length > 4 && (
+                <div
+                  className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors text-gray-400 cursor-pointer"
+                  onClick={() => onCatClick('marked')}
+                >
+                  <Star size={16} className="mr-2" />
+                  <span className="text-sm">Ver mais {markedCats.length - 4} gatos marcados</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="px-4 py-3 text-sm text-gray-400">
+              Nenhum gato marcado ainda
+            </div>
+          )}
         </div>
       </SidebarGroup>
     </div>
