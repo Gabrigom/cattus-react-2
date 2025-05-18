@@ -16,8 +16,6 @@ const getAnimalReport = async (animalId: string, options: string[] = ['profile']
       return;
     }
     
-    const queryParams = options.map(option => `options=${option}`).join('&');
-    
     const response = await fetch(`${API_URL}/report/${animalId}`, {
       method: 'POST',
       headers: {
@@ -35,7 +33,6 @@ const getAnimalReport = async (animalId: string, options: string[] = ['profile']
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     
-    // Create a download link
     const a = document.createElement('a');
     a.href = url;
     a.download = `Relatorio.pdf`;

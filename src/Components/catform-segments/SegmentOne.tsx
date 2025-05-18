@@ -56,15 +56,36 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
           {/* Left column - Image upload */}
           <div>
             <div 
-              className="w-full h-72 flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[#6C1482] rounded-md bg-[#6C1482]/20 text-white"
+              className="w-full h-100 relative flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[#6C1482] rounded-md bg-[#6C1482]/20 text-white"
               onClick={handleImageClick}
             >
               {imagePreview ? (
-                <img 
-                  src={imagePreview} 
-                  alt="Prévia da foto do gato" 
-                  className="w-full h-full object-cover rounded-md"
-                />
+                <>
+                  <img 
+                    src={imagePreview} 
+                    alt="Prévia da foto do gato" 
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                  <div className="absolute inset-0 transition-all duration-300 flex items-center justify-center">
+                    <div className="opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-90 text-white py-2 px-4 rounded-md">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="24" 
+                        height="24" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                        className="inline mr-2"
+                      >
+                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                      </svg>
+                      Alterar imagem
+                    </div>
+                  </div>
+                </>
               ) : (
                 <div className="text-center p-4">
                   <svg 

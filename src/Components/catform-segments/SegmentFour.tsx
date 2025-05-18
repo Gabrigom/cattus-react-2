@@ -155,18 +155,30 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 onClick={handleUploadClick}
               >
                 {formData.petVaccines?.length ? (
-                  <div className="text-center p-4">
-                    <p className="text-sm mb-2">Arquivo enviado: {formData.petVaccines[0].split('/').pop()}</p>
-                    <Button 
-                      variant="outline"
-                      className="text-white border-white hover:bg-white hover:text-purple-900"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(formData.petVaccines?.[0], '_blank');
-                      }}
-                    >
-                      Visualizar
-                    </Button>
+                  <div className="text-center p-4 w-full flex flex-col items-center justify-center">
+                    <p className="text-sm mb-3">Arquivo enviado: {formData.petVaccines[0].split('/').pop()}</p>
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        variant="outline"
+                        className="text-purple-900 border-purple hover:bg-purple-900 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(formData.petVaccines?.[0], '_blank');
+                        }}
+                      >
+                        Visualizar
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        className="text-purple-900 border-purple hover:bg-purple-900 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUploadClick();
+                        }}
+                      >
+                        Substituir arquivo
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center p-4">

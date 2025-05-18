@@ -249,7 +249,7 @@ const CatForm = () => {
           if (andContinue) {
             setActiveSegment('physical');
           } else {
-            navigate('/cats');
+            navigate(`/cats/${response._id}`);
           }
         } else {
           toast.error(response.message || 'Erro ao cadastrar gato');
@@ -337,9 +337,9 @@ const CatForm = () => {
               if (activeSegment === 'basic') setActiveSegment('physical');
               else if (activeSegment === 'physical') setActiveSegment('behavioral');
               else if (activeSegment === 'behavioral') setActiveSegment('medical');
-              else navigate('/cats');
+              else navigate(`/cats/${response._id}`);
             } else {
-              navigate('/cats');
+              navigate(`/cats/${response._id}`);
             }
           } else {
             toast.error(response.message || 'Erro ao atualizar gato');

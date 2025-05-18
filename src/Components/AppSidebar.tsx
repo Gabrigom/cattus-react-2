@@ -130,11 +130,13 @@ const LogoSection = () => {
       />
     </div>
   ) : (
+    <center>
     <img
       src="/public/imgs/logo_extended.png"
       alt="Cattus"
       className="h-8 w-auto"
     />
+    </center>
   );
 };
 
@@ -152,6 +154,18 @@ const calculateAge = (birthDate?: Date): number => {
   
   return age;
 };
+
+const getStatusColor = (status?: string): string => {
+  if (!status) return '#42AA49'; // Default to green (healthy)
+  
+  switch (status) {
+    case '0': return '#42AA49'; // Green for healthy
+    case '1': return '#FED400'; // Yellow for attention
+    case '2': return '#FF0200'; // Red for critical
+    default: return '#42AA49';  // Default to green
+  }
+};
+
 interface QuickViewSectionProps {
   markedCats: Animal[];
   loading: boolean;
@@ -181,33 +195,37 @@ const QuickViewSection = ({ markedCats, loading, onCatClick }: QuickViewSectionP
             </div>
           ) : markedCats.length > 0 ? (
             <>
-              {markedCats.slice(0, 4).map((cat) => (
-                <div
-                  key={cat._id}
-                  className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
-                  onClick={() => onCatClick(cat._id)}
-                >
-                  <img
-                    src={cat.petPicture || '/imgs/cat_sample.jpg'}
-                    alt={cat.petName}
-                    className="w-8 h-8 rounded-full mr-3 object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/imgs/cat_sample.jpg';
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {cat.petName}
-                    </p>
-                    <p className="text-xs text-gray-400 truncate">
-                      {cat.petGender} • {calculateAge(cat.petBirth)} anos
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      CID: {cat._id.substring(0, 4)}
-                    </p>
+              {markedCats.slice(0, 4).map((cat) => {
+                const statusColor = getStatusColor(cat.petStatus?.petCurrentStatus);
+                return (
+                  <div
+                    key={cat._id}
+                    className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
+                    onClick={() => onCatClick(cat._id)}
+                  >
+                    <img
+                      src={cat.petPicture || '/imgs/cat_sample.jpg'}
+                      alt={cat.petName}
+                      className={`w-10 h-10 rounded-full mr-3 object-cover border-2`}
+                      style={{ borderColor: statusColor }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/imgs/cat_sample.jpg';
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {cat.petName}
+                      </p>
+                      <p className="text-xs text-gray-400 truncate">
+                        {cat.petGender} • {calculateAge(cat.petBirth)} anos
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        CID: {cat._id.substring(0, 4)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               
               {markedCats.length > 4 && (
                 <div
@@ -228,6 +246,6 @@ const QuickViewSection = ({ markedCats, loading, onCatClick }: QuickViewSectionP
       </SidebarGroup>
     </div>
   );
-};
+};  
 
 export default AppSidebar;

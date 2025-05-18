@@ -28,6 +28,19 @@ const getStatusColor = (status: CatStatus): string => {
   }
 };
 
+const getStatusText = (status: CatStatus): string => {
+  switch (status) {
+    case 'healthy':
+      return 'SAUDÁVEL';
+    case 'attention':
+      return 'ATENÇÃO';
+    case 'critical':
+      return 'CRÍTICO';
+    default:
+      return 'SAUDÁVEL';
+  }
+};
+
 const CatCard = ({
   id,
   name,
@@ -39,9 +52,11 @@ const CatCard = ({
   onMarkToggle
 }: CatCardProps) => {
   const [isMarked, setIsMarked] = useState(initialMarked);
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
   
   const statusColor = getStatusColor(status);
+  const statusText = getStatusText(status);
   
   const handleMarkToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -58,22 +73,35 @@ const CatCard = ({
 
   return (
     <div 
-      className="relative rounded-md overflow-hidden cursor-pointer" 
+      className="relative rounded-md overflow-hidden cursor-pointer transform transition-all duration-300 hover:shadow-lg hover:scale-105" 
       style={{ 
         width: '190px', 
         height: '250px',
         border: `2px solid ${statusColor}`
       }}
       onClick={handleCardClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div 
-        className="absolute top-2 left-2 rounded-full z-10"
+        className={`absolute top-2 left-2 rounded-full z-10 transition-all duration-300 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
         style={{ 
           width: '14px', 
           height: '14px', 
           backgroundColor: statusColor 
         }}
       />
+
+      {isHovered && (
+        <div 
+          className="absolute top-2 left-2 z-10 rounded-full py-1 px-3 text-white text-xs font-bold text-center transition-all duration-300 inline-block"
+          style={{
+            backgroundColor: statusColor
+          }}
+        >
+          {statusText}
+        </div>
+      )}
       
       <button
         onClick={handleMarkToggle}
@@ -91,7 +119,7 @@ const CatCard = ({
         <img 
           src={imageUrl} 
           alt={`Foto de ${name}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
         />
       </div>
       
