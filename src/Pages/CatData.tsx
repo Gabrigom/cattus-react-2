@@ -3,17 +3,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CatProfile from '@/Components/CatProfile';
 import CatStatus from '@/Components/CatStatus';
 import CatActivities from '@/Components/CatActivities';
+import ReportSettings from '@/Components/ReportSettings';
 import { Button } from '@/Components/ui/button';
-import { AnimalService, ActivityService } from '@/Services';
+import { AnimalService, ActivityService, ReportService } from '@/Services';
 import { Animal, Activity } from '@/Services/types';
+import { toast } from 'react-toastify';
 
 const CatData = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  
+  // State
   const [cat, setCat] = useState<Animal | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
   
   const [sectionsState, setSectionsState] = useState({
     profile: true,
@@ -26,6 +32,25 @@ const CatData = () => {
       ...sectionsState,
       [section]: !sectionsState[section]
     });
+  };
+
+  const generateReport = async (options: string[] = ['profile', 'status', 'activities']) => {
+    if (!cat?._id) {
+      toast.error('ID do gato não encontrado para gerar relatório.');
+      return;
+    }
+    try {
+      setReportLoading(true);
+      await ReportService.getAnimalReport(cat._id, options);
+      toast.success('Relatório gerado com sucesso!');
+      // Close modal after successful generation
+      setReportModalOpen(false);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      // Error toast is already shown in the service
+    } finally {
+      setReportLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -78,6 +103,7 @@ const CatData = () => {
     );
   }
 
+  // Data formatting for components
   const formatCatForProfile = () => {
     return {
       id: cat._id,
@@ -106,20 +132,12 @@ const CatData = () => {
     };
   };
 
-  const generateReport = () => {
-    try {
-      window.open(`http://ec2-52-15-64-33.us-east-2.compute.amazonaws.com/report/${cat._id}`, '_blank');
-    } catch (error) {
-      console.error('Error generating report:', error);
-    }
-  };
-
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white">Perfil do gato - {cat.petName}</h1>
         <Button 
-          onClick={generateReport}
+          onClick={() => setReportModalOpen(true)}
           className="bg-green-600 hover:bg-green-700 text-white"
         >
           GERAR RELATÓRIO
@@ -146,6 +164,13 @@ const CatData = () => {
           activities={activities}
         />
       </div>
+
+      <ReportSettings
+        open={reportModalOpen}
+        onOpenChange={setReportModalOpen}
+        catId={cat._id}
+        onGenerateReport={generateReport}
+      />
     </div>
   );
 };
