@@ -1,3 +1,4 @@
+import { get } from 'http';
 import { getData, postDataJSON, deleteData } from './api';
 import { Activity, ActivityResponse } from './types';
 
@@ -16,10 +17,14 @@ const remove = (id: string): Promise<boolean> =>
 const getAverageActivity = (interval: string): Promise<any> => 
     getData<any>(`/activity/charts/average-animal-activity/${interval}`);
 
+const getByCameraId = (cameraId: string): Promise<Activity[]> =>
+    getData<Activity[]>(`/activity/select-by-camera/${cameraId}`);
+
 export default {
     getAll,
     getOne,
     create,
     remove,
-    getAverageActivity
+    getAverageActivity,
+    getByCameraId
 };

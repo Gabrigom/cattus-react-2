@@ -5,8 +5,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Badge } from '@/Components/ui/badge';
 import VideoPlayer from '@/Components/VideoPlayer';
 import ActivityList, { ActivityItem } from '@/Components/ActivityList';
-import { CameraService } from '@/Services';
-import { Camera } from '@/Services/types';
+import { CameraService, ActivityService, AnimalService } from '@/Services';
+import { Camera, Activity, Animal } from '@/Services/types';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 
@@ -23,92 +23,15 @@ const Streaming = () => {
   const [camera, setCamera] = useState<Camera | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [catActivities, setCatActivities] = useState<ActivityItem[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
   
-  // Atividades mockadas ainda
-  const [catActivities, setCatActivities] = useState<ActivityItem[]>([
-    {
-      id: '0001',
-      title: 'Pompeu',
-      subtitle: 'Macho · 10 anos',
-      imageUrl: '/imgs/cat_sample.jpg',
-      timestamp: {
-        date: '18/04',
-        time: '19h05'
-      },
-      catId: '0001',
-      metadata: {
-        status: 'Saudável',
-        location: 'Área de descanso'
-      }
-    },
-    {
-      id: '0002',
-      title: 'Pompeu',
-      subtitle: 'Macho · 10 anos',
-      imageUrl: '/imgs/cat_sample.jpg',
-      timestamp: {
-        date: '18/04',
-        time: '17h41'
-      },
-      catId: '0002',
-      metadata: {
-        status: 'Saudável',
-        location: 'Área de descanso'
-      }
-    },
-    {
-      id: '0003',
-      title: 'Pompeu',
-      subtitle: 'Macho · 10 anos',
-      imageUrl: '/imgs/cat_sample.jpg',
-      timestamp: {
-        date: '18/04',
-        time: '15h32'
-      },
-      catId: '0003',
-      metadata: {
-        status: 'Saudável',
-        location: 'Área de descanso'
-      }
-    },
-    {
-      id: '0004',
-      title: 'Pompeu',
-      subtitle: 'Macho · 10 anos',
-      imageUrl: '/imgs/cat_sample.jpg',
-      timestamp: {
-        date: '18/04',
-        time: '14h45'
-      },
-      catId: '0004',
-      metadata: {
-        status: 'Saudável',
-        location: 'Área de descanso'
-      }
-    },
-    {
-      id: '0005',
-      title: 'Pompeu',
-      subtitle: 'Macho · 10 anos',
-      imageUrl: '/imgs/cat_sample.jpg',
-      timestamp: {
-        date: '18/04',
-        time: '13h20'
-      },
-      catId: '0005',
-      metadata: {
-        status: 'Saudável',
-        location: 'Área de descanso'
-      }
-    }
-  ]);
-
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
       try {
         const decoded = jwtDecode<JwtPayload>(token);
-        setIsUserAdmin(decoded.emplyeeAccessLevel && decoded.employeeAccessLevel >= 1);
+        setIsUserAdmin(decoded.accessLevel !== undefined && decoded.accessLevel >= 1);
       } catch (error) {
         console.error('Error decoding token:', error);
       }
@@ -135,6 +58,55 @@ const Streaming = () => {
 
     fetchCamera();
   }, [id]);
+
+  useEffect(() => {
+    const fetchCameraActivities = async () => {
+      if (!id) return;
+      
+      try {
+        setLoadingActivities(true);
+        // Fetch activities for this camera
+        const activities = await ActivityService.getByCameraId(id);
+        
+        // Transform activities into ActivityItems for the ActivityList component
+        const activityItems: ActivityItem[] = await Promise.all(activities.map(async (activity) => {
+          const animal = activity.activityAuthor as Animal;
+          
+          // Format the timestamps
+          const startDate = new Date(activity.activityData.activityStart);
+          const formattedDate = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}`;
+          const formattedTime = `${startDate.getHours().toString().padStart(2, '0')}h${startDate.getMinutes().toString().padStart(2, '0')}`;
+          
+          return {
+            id: activity._id,
+            title: animal.petName,
+            subtitle: `${animal.petGender} · ${calculateAge(animal.petBirth)} anos`,
+            imageUrl: animal.petPicture || '/imgs/cat_sample.jpg',
+            timestamp: {
+              date: formattedDate,
+              time: formattedTime
+            },
+            catId: animal._id,
+            metadata: {
+              status: getStatusText(animal.petStatus?.petCurrentStatus),
+              location: camera?.cameraLocation || 'Área não especificada',
+              activityName: activity.activityData.activityName
+            }
+          };
+        }));
+        
+        setCatActivities(activityItems);
+        setLoadingActivities(false);
+      } catch (error) {
+        console.error('Error fetching camera activities:', error);
+        setLoadingActivities(false);
+      }
+    };
+    
+    if (camera) {
+      fetchCameraActivities();
+    }
+  }, [camera, id]);
 
   const toggleCameraStatus = async () => {
     if (!camera || !isUserAdmin) return;
@@ -225,14 +197,42 @@ const Streaming = () => {
         {/* Right side - Cat Activities */}
         <div className="w-full lg:w-80">
           <ActivityList 
-            title="Atividades"
+            title="Atividades nesta câmera"
             items={catActivities}
             maxHeight="500px"
+            loading={loadingActivities}
+            emptyMessage="Não há atividades registradas nesta câmera"
           />
         </div>
       </div>
     </div>
   );
+};
+
+const calculateAge = (birthDate?: Date): number => {
+  if (!birthDate) return 0;
+  
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+};
+
+const getStatusText = (status?: string): string => {
+  if (!status) return 'Saudável';
+  
+  switch (status) {
+    case '0': return 'Saudável';
+    case '1': return 'Em atenção';
+    case '2': return 'Crítico';
+    default: return 'Saudável';
+  }
 };
 
 export default Streaming;

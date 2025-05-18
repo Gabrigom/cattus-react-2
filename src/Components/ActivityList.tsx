@@ -24,6 +24,7 @@ interface ActivityListProps {
   maxHeight?: string;
   onItemClick?: (item: ActivityItem) => void;
   emptyMessage?: string;
+  loading?: boolean;
 }
 
 const ActivityList = ({
@@ -31,7 +32,8 @@ const ActivityList = ({
   items,
   maxHeight = "calc(100vh-260px)",
   onItemClick,
-  emptyMessage = "Não há atividades para exibir"
+  emptyMessage = "Não há atividades para exibir",
+  loading = false
 }: ActivityListProps) => {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
@@ -53,6 +55,21 @@ const ActivityList = ({
       navigate(`/cats/${item.catId}`);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-[#1A1B21] rounded-md h-full overflow-hidden flex flex-col">
+        {title && (
+          <div className="p-3 text-center bg-[#475746] border-b border-gray-800">
+            <h3 className="text-lg font-semibold text-white">{title}</h3>
+          </div>
+        )}
+        <div className="flex-1 flex items-center justify-center" style={{height: maxHeight}}>
+          <div className="w-8 h-8 border-4 border-gray-600 border-t-white rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#1A1B21] rounded-md h-full overflow-hidden flex flex-col">
@@ -114,7 +131,10 @@ const ActivityList = ({
                     <div className="ml-13 pl-13">
                       <p className="mb-1">Última aparição: {item.timestamp.date} às {item.timestamp.time}</p>
                       <p className="mb-1">Estado: {item.metadata?.status || 'Saudável'}</p>
-                      <p>Localização: {item.metadata?.location || 'Área de descanso'}</p>
+                      <p className="mb-1">Localização: {item.metadata?.location || 'Área de descanso'}</p>
+                      {item.metadata?.activityName && (
+                        <p>Atividade: {item.metadata.activityName}</p>
+                      )}
                     </div>
                   </div>
                 )}

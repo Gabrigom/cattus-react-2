@@ -69,12 +69,13 @@ export interface CameraResponse extends ApiResponse {
 
 export interface Activity {
   _id: string;
-  activityAuthor: string;
+  activityAuthor: string | Animal;
   activityData: {
       activityName: string;
       activityStart: Date;
       activityEnd: Date;
   };
+  activityCameraAuthor: string | Camera;
 }
 
 export interface ActivityResponse extends ApiResponse {
