@@ -99,8 +99,10 @@ const CatData = () => {
       meowLevel: cat.behavioralCharacteristics?.meow || 'Não especificado',
       comorbidities: cat.petComorbidities ? cat.petComorbidities.split(',').map(c => c.trim()) : [],
       vaccine: cat.petVaccines && cat.petVaccines.length > 0 ? cat.petVaccines[0] : '',
-      marked: cat.petFavorite,
-      status: mapStatus(cat.petStatus?.petCurrentStatus)
+      marked: cat.petFavorite || false,
+      status: mapStatus(cat.petStatus?.petCurrentStatus),
+      lastEditedBy: cat.lastEditedBy,
+      updatedAt: cat.updatedAt
     };
   };
 

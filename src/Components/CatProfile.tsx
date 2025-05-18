@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/Components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Star } from 'lucide-react';
+import { AnimalService } from '@/Services';
+import { toast } from 'react-toastify';
 
 interface Cat {
   id: string;
@@ -25,6 +27,12 @@ interface Cat {
   vaccine: string;
   marked: boolean;
   status: 'healthy' | 'attention' | 'critical';
+  lastEditedBy?: {
+    employeeName: string;
+    _id: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface CatProfileProps {
@@ -35,14 +43,64 @@ interface CatProfileProps {
 
 const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
   const navigate = useNavigate();
+  const [isMarked, setIsMarked] = useState(cat.marked);
   
   const handleEditClick = () => {
     navigate(`/cats/edit/${cat.id}`);
   };
 
+  const getFurColorHex = (colorName: string): string => {
+  switch (colorName.toLowerCase()) {
+    case 'preta':
+      return '#000000';
+    case 'branca':
+      return '#FFFFFF';
+    case 'cinza':
+      return '#808080';
+    case 'laranja':
+      return '#FFA500';
+    case 'marrom':
+      return '#8B4513';
+    case 'mesclada':
+      return 'linear-gradient(45deg, #000000 25%, #FFFFFF 25%, #FFFFFF 50%, #000000 50%, #000000 75%, #FFFFFF 75%)';
+    default:
+      return '#CCCCCC'; // Default gray for unknown colors
+  }
+};
+
+  const handleMarkToggle = async () => {
+    const newMarkedState = !isMarked;
+    setIsMarked(newMarkedState);
+    
+    try {
+      const response = await AnimalService.update(cat.id, {
+        petFavorite: newMarkedState
+      });
+      
+      if (response.ok) {
+        toast.success(newMarkedState ? 'Gato marcado com sucesso!' : 'Gato desmarcado com sucesso!');
+      } else {
+        // Revert state if request failed
+        setIsMarked(!newMarkedState);
+        toast.error('Erro ao atualizar marcação');
+      }
+    } catch (error) {
+      console.error('Error updating mark status:', error);
+      // Revert state if request failed
+      setIsMarked(!newMarkedState);
+      toast.error('Erro ao atualizar marcação');
+    }
+  };
 
   const handleVaccineUpload = () => {
     console.log('Opening file picker for vaccine upload');
+  };
+
+  const formatDate = (dateString?: string): string => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
   };
 
   if (!isExpanded) {
@@ -129,7 +187,10 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
               <div className="flex items-center gap-2">
                 <span className="text-gray-400 w-1/3">Cor:</span>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-black"></div>
+                  <div 
+                    className="w-4 h-4 rounded-full" 
+                    style={{ backgroundColor: getFurColorHex(cat.color) }}
+                  ></div>
                   <span className="text-white">{cat.color}</span>
                 </div>
               </div>
@@ -229,19 +290,28 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
           </div>
         </div>
         
-        {/* Footer with registration info and edit button */}
         <div className="flex justify-between items-center mt-8">
           <div className="text-xs text-gray-400">
-            <p>Cadastrado por: Vinicius Gomes</p>
-            <p>Última alteração: {new Date().toLocaleDateString('pt-BR')}</p>
+            <p>Alterado por: {cat.lastEditedBy?.employeeName || "Não especificado"}</p>
+            <p>Última alteração: {formatDate(cat.updatedAt) || new Date().toLocaleDateString('pt-BR')}</p>
           </div>
           
-          <Button 
-            onClick={() => handleEditClick()}
-            className="px-8 bg-green-600 hover:bg-green-700 text-white"
-          >
-            EDITAR
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleMarkToggle}
+              className={`px-8 ${isMarked ? 'bg-purple-700 hover:bg-purple-800' : 'bg-gray-600 hover:bg-gray-700'} text-white`}
+            >
+              <Star className="mr-2" size={16} fill={isMarked ? "white" : "none"} />
+              {isMarked ? 'DESMARCAR' : 'MARCAR'}
+            </Button>
+            
+            <Button 
+              onClick={handleEditClick}
+              className="px-8 bg-green-600 hover:bg-green-700 text-white"
+            >
+              EDITAR
+            </Button>
+          </div>
         </div>
       </div>
     </div>

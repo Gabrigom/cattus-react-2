@@ -48,6 +48,14 @@ export interface Animal {
       petLastOccurrence: Date | null; 
   };
   petFavorite: boolean;
+  lastEditedBy?: {
+    _id: string;
+    employeeName: string;
+    employeeEmail?: string;
+    employeePicture?: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AnimalResponse extends ApiResponse {
