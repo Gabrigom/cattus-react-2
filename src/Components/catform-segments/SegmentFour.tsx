@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Animal } from '@/Services/types';
 import { Button } from '@/Components/ui/button';
-import { HelpCircle } from 'lucide-react';
 import { Badge } from '@/Components/ui/badge';
 
 interface SegmentFourProps {
@@ -60,18 +59,39 @@ const SegmentFour: React.FC<SegmentFourProps> = ({
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      console.log('File selected:', file.name);
-      
-      const fileUrl = URL.createObjectURL(file);
+const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    try {
+      const currentVaccines = formData.petVaccines || [];
       onChange({
         ...formData,
-        petVaccines: [fileUrl]
+        petVaccines: [...currentVaccines, 'loading']
+      });
+      
+      const { uploadImageFile } = await import('@/utils/imageUpload');
+      const imageUrl = await uploadImageFile(file);
+      
+      if (imageUrl) {
+        onChange({
+          ...formData,
+          petVaccines: [imageUrl]
+        });
+      } else {
+        onChange({
+          ...formData,
+          petVaccines: currentVaccines
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading vaccine:', error);
+      onChange({
+        ...formData,
+        petVaccines: formData.petVaccines
       });
     }
-  };
+  }
+};
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();

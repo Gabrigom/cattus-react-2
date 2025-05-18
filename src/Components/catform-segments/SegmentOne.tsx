@@ -4,7 +4,6 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Textarea } from '@/Components/ui/textarea';
-import { HelpCircle } from 'lucide-react';
 
 interface SegmentOneProps {
   formData: Partial<Animal>;
@@ -34,12 +33,11 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
     onChange({ ...formData, [field]: value });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      handleChange('petPicture', previewUrl);
     }
   };
 
@@ -105,7 +103,6 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
             <p className="mt-2 text-center text-sm text-gray-400">Foto de perfil*</p>
           </div>
 
-          {/* Right column - Form fields */}
           <div className="space-y-6">
             <div>
             <p className="text-white mb-2">Nome*</p>

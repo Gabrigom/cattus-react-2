@@ -229,8 +229,13 @@ const CatForm = () => {
         
         const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
         if (pictureInput?.files?.length) {
-          formDataToSubmit.append('petPicture', pictureInput.files[0]);
+        const { uploadImageFile } = await import('@/utils/imageUpload');
+        const imageUrl = await uploadImageFile(pictureInput.files[0]);
+        
+        if (imageUrl) {
+          formDataToSubmit.append('petPicture', imageUrl);
         }
+      }
         
         const response = await AnimalService.create(formDataToSubmit);
         
@@ -261,13 +266,27 @@ const CatForm = () => {
             petObs: formData.petObs
           };
           
-          const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
-          if (pictureInput?.files?.length) {
-            patchData.petPicture = URL.createObjectURL(pictureInput.files[0]);
-          }
-          
           if (formData.petBirth) {
             patchData.petBirth = formData.petBirth;
+          }
+          
+          const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
+          if (pictureInput?.files?.length) {
+            setIsLoading(true);
+            try {
+              const { uploadImageFile } = await import('@/utils/imageUpload');
+              const imageUrl = await uploadImageFile(pictureInput.files[0]);
+              
+              if (imageUrl) {
+                console.log('Setting petPicture URL:', imageUrl);
+                patchData.petPicture = imageUrl;
+              }
+            } catch (error) {
+              console.error('Error uploading image during update:', error);
+              toast.error('Erro ao fazer upload da imagem');
+              setIsLoading(false);
+              return;
+            }
           }
         } 
         else if (activeSegment === 'physical') {
@@ -288,25 +307,46 @@ const CatForm = () => {
           
           const vaccineInput = document.getElementById('pet-vaccine') as HTMLInputElement;
           if (vaccineInput?.files?.length) {
-            patchData.petVaccines = [URL.createObjectURL(vaccineInput.files[0])];
+            setIsLoading(true);
+            try {
+              const { uploadImageFile } = await import('@/utils/imageUpload');
+              const imageUrl = await uploadImageFile(vaccineInput.files[0]);
+              
+              if (imageUrl) {
+                console.log('Setting petVaccines URL:', imageUrl);
+                patchData.petVaccines = [imageUrl];
+              }
+            } catch (error) {
+              console.error('Error uploading vaccine during update:', error);
+              toast.error('Erro ao fazer upload do documento de vacinação');
+              setIsLoading(false);
+              return;
+            }
           }
         }
         
-        const response = await AnimalService.update(catId, patchData);
+        console.log('Sending PATCH data:', patchData);
         
-        if (response.ok) {
-          toast.success('Gato atualizado com sucesso!');
+        try {
+          const response = await AnimalService.update(catId, patchData);
           
-          if (andContinue) {
-            if (activeSegment === 'basic') setActiveSegment('physical');
-            else if (activeSegment === 'physical') setActiveSegment('behavioral');
-            else if (activeSegment === 'behavioral') setActiveSegment('medical');
-            else navigate('/cats');
+          if (response.ok) {
+            toast.success('Gato atualizado com sucesso!');
+            
+            if (andContinue) {
+              if (activeSegment === 'basic') setActiveSegment('physical');
+              else if (activeSegment === 'physical') setActiveSegment('behavioral');
+              else if (activeSegment === 'behavioral') setActiveSegment('medical');
+              else navigate('/cats');
+            } else {
+              navigate('/cats');
+            }
           } else {
-            navigate('/cats');
+            toast.error(response.message || 'Erro ao atualizar gato');
           }
-        } else {
-          toast.error(response.message || 'Erro ao atualizar gato');
+        } catch (error) {
+          console.error('Error updating cat:', error);
+          toast.error('Erro ao atualizar gato');
         }
       }
       
