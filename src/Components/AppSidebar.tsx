@@ -124,7 +124,7 @@ const LogoSection = () => {
   return collapsed ? (
     <div className="flex justify-center w-full">
       <img
-        src="/public/imgs/logo_compact.png"
+        src="/imgs/logo_compact.png"
         alt="Cattus"
         className="h-8 w-auto"
       />
@@ -132,7 +132,7 @@ const LogoSection = () => {
   ) : (
     <center>
     <img
-      src="/public/imgs/logo_extended.png"
+      src="/imgs/logo_extended.png"
       alt="Cattus"
       className="h-8 w-auto"
     />

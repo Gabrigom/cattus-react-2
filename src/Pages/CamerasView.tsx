@@ -102,7 +102,6 @@ const CamerasView = () => {
         onApplyFilters={handleApplyFilters}
       />
 
-      {/* Camera cards grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {cameras.map((camera) => (
           <CameraCard
