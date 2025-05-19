@@ -47,13 +47,12 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
 
   return (
     <div className="bg-gray-900 rounded-md overflow-hidden">
-      <div className="p-3 bg-[#475746] flex justify-between items-center">
+      <div className="p-3 bg-[#3c8054] flex justify-between items-center">
         <h2 className="text-lg font-semibold text-white">Informações básicas e foto de perfil</h2>
       </div>
 
       <div className="p-6 bg-[#324250]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left column - Image upload */}
           <div>
             <div 
               className="w-full h-100 relative flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[#6C1482] rounded-md bg-[#6C1482]/20 text-white"

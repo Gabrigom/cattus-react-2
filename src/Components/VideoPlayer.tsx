@@ -59,7 +59,6 @@ const VideoPlayer = ({ isActive, imageUrl, title, className = "" }: VideoPlayerP
     >
       {isActive ? (
         <>
-          {/* This would be replaced with actual video player in a real implementation */}
           {isPlaying ? (
             <img 
               src={imageUrl} 

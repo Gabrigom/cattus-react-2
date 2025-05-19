@@ -45,15 +45,14 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
 
   return (
     <div className="bg-gray-900 rounded-md overflow-hidden">
-      <div className="p-3 bg-[#475746] flex justify-between items-center">
+      <div className="p-3 bg-[#3c8054] flex justify-between items-center">
         <h2 className="text-lg font-semibold text-white">Comportamento social</h2>
       </div>
 
       <div className="p-6 bg-[#324250]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left column - Cat image with info */}
           <div>
-            <div className="bg-[#3c8054] rounded-md overflow-hidden p-4">
+            <div className="bg-[#6c1482] rounded-md overflow-hidden p-4">
               <h2 className="text-2xl font-bold text-white mb-1">{catName}</h2>
               <p className="text-white text-sm mb-2">{catGender} • {catAge} anos</p>
               
@@ -67,10 +66,8 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
             </div>
           </div>
 
-          {/* Right column - Form fields */}
           <div className="col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Personality */}
               <div>
                 <p className="text-white mb-2">Personalidade*:</p>
                 <Select
@@ -90,7 +87,6 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
                 </Select>
               </div>
 
-              {/* Activity Level */}
               <div>
                 <p className="text-white mb-2">Nível de atividade*:</p>
                 <Select
@@ -108,7 +104,6 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
                 </Select>
               </div>
 
-              {/* Meow Level */}
               <div>
                 <p className="text-white mb-2">Miado:</p>
                 <Select
@@ -128,7 +123,6 @@ const SegmentThree: React.FC<SegmentThreeProps> = ({
               </div>
             </div>
 
-            {/* Peculiarities / Social Behavior */}
             <div>
               <p className="text-white mb-2">Peculiaridades:</p>
               <Textarea

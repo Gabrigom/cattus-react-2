@@ -405,7 +405,7 @@ const CatForm = () => {
           <button
             className={`w-full text-left p-4 transition-colors ${
               activeSegment === 'basic' 
-                ? 'bg-[#475746] text-white font-semibold' 
+                ? 'bg-[#3c8054] text-white font-semibold' 
                 : 'text-white hover:bg-gray-800'
             } ${
               completedSegments.basic 
@@ -420,7 +420,7 @@ const CatForm = () => {
           <button
             className={`w-full text-left p-4 transition-colors ${
               activeSegment === 'physical' 
-                ? 'bg-[#475746] text-white font-semibold' 
+                ? 'bg-[#3c8054] text-white font-semibold' 
                 : 'text-white hover:bg-gray-800'
             } ${
               completedSegments.physical 
@@ -438,7 +438,7 @@ const CatForm = () => {
           <button
             className={`w-full text-left p-4 transition-colors ${
               activeSegment === 'behavioral' 
-                ? 'bg-[#475746] text-white font-semibold' 
+                ? 'bg-[#3c8054] text-white font-semibold' 
                 : 'text-white hover:bg-gray-800'
             } ${
               completedSegments.behavioral 
@@ -456,7 +456,7 @@ const CatForm = () => {
           <button
             className={`w-full text-left p-4 transition-colors ${
               activeSegment === 'medical' 
-                ? 'bg-[#475746] text-white font-semibold' 
+                ? 'bg-[#3c8054] text-white font-semibold' 
                 : 'text-white hover:bg-gray-800'
             } ${
               completedSegments.medical 

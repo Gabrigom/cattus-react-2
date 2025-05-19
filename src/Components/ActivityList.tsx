@@ -60,7 +60,7 @@ const ActivityList = ({
     return (
       <div className="bg-[#1A1B21] rounded-md h-full overflow-hidden flex flex-col">
         {title && (
-          <div className="p-3 text-center bg-[#475746] border-b border-gray-800">
+          <div className="p-3 text-center bg-[#6c1482] border-b border-gray-800">
             <h3 className="text-lg font-semibold text-white">{title}</h3>
           </div>
         )}
@@ -74,7 +74,7 @@ const ActivityList = ({
   return (
     <div className="bg-[#1A1B21] rounded-md h-full overflow-hidden flex flex-col">
       {title && (
-        <div className="p-3 text-center bg-[#475746] border-b border-gray-800">
+        <div className="p-3 text-center bg-[#6c1482] border-b border-gray-800">
           <h3 className="text-lg font-semibold text-white">{title}</h3>
         </div>
       )}

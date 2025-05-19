@@ -79,7 +79,7 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
     return (
       <div className="bg-gray-900 rounded-md overflow-hidden">
         <div 
-          className="p-3 bg-[#475746] flex justify-between items-center cursor-pointer"
+          className="p-3 bg-[#3c8054] flex justify-between items-center cursor-pointer"
           onClick={onToggleExpand}
         >
           <h2 className="text-lg font-semibold text-white">Atividades</h2>
@@ -92,7 +92,7 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
   return (
     <div className="bg-gray-900 rounded-md overflow-hidden">
       <div 
-        className="p-3 bg-[#475746] flex justify-between items-center cursor-pointer"
+        className="p-3 bg-[#3c8054] flex justify-between items-center cursor-pointer"
         onClick={onToggleExpand}
       >
         <h2 className="text-lg font-semibold text-white">Atividades</h2>

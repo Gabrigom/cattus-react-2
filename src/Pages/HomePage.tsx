@@ -234,16 +234,16 @@ const HomePage = () => {
   return (
     <div className="relative">
       <div 
-        className="absolute top-0 left-0 right-0 h-[35vh] z-0 pointer-events-none"
+        className="absolute top-0 left-0 right-0 h-[50vh] z-0 pointer-events-none"
         style={{ 
-          background: 'linear-gradient(to bottom, rgba(58, 78, 59, 0.9) 0%, rgba(30, 35, 30, 0.7) 50%, rgba(0, 0, 0, 0) 100%)' 
+          background: 'linear-gradient(to bottom, rgb(55, 113, 75) 0%, rgb(28, 37, 32) 50%, rgb(0, 0, 0) 100%)' 
         }}
       ></div>
       
       <div className="p-6 relative z-10">
         <div className="mb-8 pr-80">
           <h1 className="text-3xl font-bold text-white mb-4">Bem vindo, {employeeName}</h1>
-          <p className="text-gray-400 mb-4">Use o menu lateral para navegar ou as opções abaixo:</p>
+          <p className="text-gray-400 mb-4">Use o menu lateral para navegar, a barra de pesquisa ou as opções abaixo:</p>
           
           <div className="flex flex-wrap gap-4">
             {actionButtons.map((button, index) => (

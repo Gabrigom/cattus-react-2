@@ -6,6 +6,8 @@ import Notification from './Notification';
 import ProfilePopup from './ProfilePopup';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
+import { useLocation } from 'react-router-dom';
+
 interface JwtPayload {
   name?: string;
   id?: string;
@@ -19,8 +21,12 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [userName, setUserName] = useState('');
-  const [profilePicture, setProfilePicture] = useState<string>('/imgs/profile_sample.png');;
+  const [profilePicture, setProfilePicture] = useState<string>('/imgs/profile_sample.png');
   const profileBtnRef = useRef<HTMLButtonElement>(null);
+  
+  // Use location to determine if we're on the home page
+  const location = useLocation();
+  const isHomePage = location.pathname === '/home' || location.pathname === '/';
   
   useEffect(() => {
     const token = Cookies.get('token');
@@ -58,7 +64,14 @@ const Header = () => {
   };
   
   return (
-    <header className="bg-black h-16 flex items-center justify-between px-6 border-b border-gray-800">
+    <header 
+      className={`h-16 flex items-center justify-between px-6 ${
+        isHomePage ? 'bg-transparent' : 'bg-black border-b border-gray-800' 
+      }`}
+      style={isHomePage ? { 
+        background: 'linear-gradient(to bottom, rgb(60, 128, 84) 0%, rgb(55, 113, 75) 100%)'
+      } : {}}
+    >
       <form onSubmit={handleSearch}>
         <div className="relative w-1/2 max-w-lg">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />

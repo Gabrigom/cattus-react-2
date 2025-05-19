@@ -123,7 +123,7 @@ const StatusChange = ({
       }}
     >
       <div className="flex">
-        {/* Cat image with status */}
+
         <div className="relative mr-3">
           <img 
             src={catImageUrl} 
@@ -143,7 +143,6 @@ const StatusChange = ({
           </div>
         </div>
         
-        {/* Text content */}
         <div className="flex-1 pl-2 pr-16">
           <div className="text-white">
             <span className="font-bold">{catName}</span>{' '}
@@ -167,7 +166,6 @@ const StatusChange = ({
           </div>
         </div>
         
-        {/* Date/Time */}
         <div className="absolute right-3 top-3 text-right text-xs text-gray-400">
           <div>{date}</div>
           <div>{time}</div>

@@ -64,7 +64,7 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
     case 'mesclada':
       return 'linear-gradient(45deg, #000000 25%, #FFFFFF 25%, #FFFFFF 50%, #000000 50%, #000000 75%, #FFFFFF 75%)';
     default:
-      return '#CCCCCC'; // Default gray for unknown colors
+      return '#CCCCCC';
   }
 };
 
@@ -80,13 +80,11 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
       if (response.ok) {
         toast.success(newMarkedState ? 'Gato marcado com sucesso!' : 'Gato desmarcado com sucesso!');
       } else {
-        // Revert state if request failed
         setIsMarked(!newMarkedState);
         toast.error('Erro ao atualizar marcação');
       }
     } catch (error) {
       console.error('Error updating mark status:', error);
-      // Revert state if request failed
       setIsMarked(!newMarkedState);
       toast.error('Erro ao atualizar marcação');
     }
@@ -107,7 +105,7 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
     return (
       <div className="bg-gray-900 rounded-md overflow-hidden">
         <div 
-          className="p-3 bg-[#475746] flex justify-between items-center cursor-pointer"
+          className="p-3 bg-[#3c8054] flex justify-between items-center cursor-pointer"
           onClick={onToggleExpand}
         >
           <h2 className="text-lg font-semibold text-white">Perfil</h2>
@@ -120,7 +118,7 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
   return (
     <div className="bg-gray-900 rounded-md overflow-hidden">
       <div 
-        className="p-3 bg-[#475746] flex justify-between items-center cursor-pointer"
+        className="p-3 bg-[#3c8054] flex justify-between items-center cursor-pointer"
         onClick={onToggleExpand}
       >
         <h2 className="text-lg font-semibold text-white">Perfil</h2>
@@ -129,7 +127,6 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
 
       <div className="p-6 bg-[#324250]">
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Left column - Cat image */}
           <div className="md:w-1/4">
             <div className="bg-[#3c8054] h-100 w-full rounded-md overflow-hidden flex items-center justify-center">
               <img 

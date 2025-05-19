@@ -207,7 +207,7 @@ const CatsView = () => {
             name={cat.petName}
             gender={cat.petGender}
             age={getAge(cat.petBirth)}
-            imageUrl={cat.petPicture || '/public/imgs/cat_sample.jpg'}
+            imageUrl={cat.petPicture || 'imgs/cat_sample.jpg'}
             status={mapCatStatus(cat.petStatus?.petCurrentStatus)}
             initialMarked={cat.petFavorite}
             onMarkToggle={handleMarkToggle}

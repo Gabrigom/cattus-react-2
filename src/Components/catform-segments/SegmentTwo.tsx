@@ -70,15 +70,14 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
 
   return (
     <div className="bg-gray-900 rounded-md overflow-hidden">
-      <div className="p-3 bg-[#475746] flex justify-between items-center">
+      <div className="p-3 bg-[#3c8054] flex justify-between items-center">
         <h2 className="text-lg font-semibold text-white">Características físicas</h2>
       </div>
 
       <div className="p-6 bg-[#324250]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left column - Cat image with info */}
           <div>
-            <div className="bg-[#3c8054] rounded-md overflow-hidden p-4">
+            <div className="bg-[#6c1482] rounded-md overflow-hidden p-4">
               <h2 className="text-2xl font-bold text-white mb-1">{catName}</h2>
               <p className="text-white text-sm mb-2">{catGender} • {catAge} anos</p>
               
@@ -92,10 +91,8 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
             </div>
           </div>
 
-          {/* Right column - Form fields in a grid */}
           <div className="col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Raça */}
               <div>
                 <p className="text-white mb-2">Raça</p>
                 <Select
@@ -119,7 +116,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
                 </Select>
               </div>
 
-              {/* Cor predominante */}
               <div>
                 <p className="text-white mb-2">Cor predominante</p>
                 <Select
@@ -142,7 +138,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Tamanho */}
               <div>
                 <p className="text-white mb-2">Tamanho (cm)</p>
                 <Input
@@ -155,7 +150,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
                 />
               </div>
 
-              {/* Peso */}
               <div>
                 <p className="text-white mb-2">Peso (kg)</p>
                 <Input
@@ -168,7 +162,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
                 />
               </div>
 
-              {/* Pelagem */}
               <div>
                 <p className="text-white mb-2">Pelagem</p>
                 <Select
@@ -188,7 +181,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Cor dos olhos */}
               <div>
                 <p className="text-white mb-2">Cor dos olhos</p>
                 <Select
@@ -208,7 +200,6 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
                 </Select>
               </div>
 
-              {/* Castrado checkbox */}
               <div className="flex items-center">
                 <div className="flex items-center space-x-2 mt-8">
                   <Checkbox 

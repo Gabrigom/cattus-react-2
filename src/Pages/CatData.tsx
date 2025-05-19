@@ -103,7 +103,6 @@ const CatData = () => {
     );
   }
 
-  // Data formatting for components
   const formatCatForProfile = () => {
     return {
       id: cat._id,
@@ -112,7 +111,7 @@ const CatData = () => {
       birthDate: formatDate(cat.petBirth),
       age: calculateAge(cat.petBirth),
       description: cat.petObs || 'Sem descrição disponível',
-      profilePicture: cat.petPicture || '/public/imgs/cat_sample.jpg',
+      profilePicture: cat.petPicture || 'imgs/cat_sample.jpg',
       isCastrated: cat.petCharacteristics?.petCastrated === 'Sim',
       race: cat.petCharacteristics?.petBreed || 'Não especificado',
       color: cat.physicalCharacteristics?.furColor || 'Não especificado',

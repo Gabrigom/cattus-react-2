@@ -154,9 +154,7 @@ const Streaming = () => {
       <h1 className="text-3xl font-bold text-white mb-6">Streaming</h1>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left side - Video Player and Camera Details */}
         <div className="flex-1">
-          {/* Video Player */}
           <div className="mb-4">
             <VideoPlayer 
               isActive={camera.cameraStatus === 1} 
@@ -165,7 +163,6 @@ const Streaming = () => {
             />
           </div>
 
-          {/* Camera Details */}
           <div className="bg-gray-900 rounded-md p-4 mb-4 w-[90%] mx-auto">
             <div className="flex justify-between items-start mb-2">
               <h2 className="text-2xl font-bold text-white">Câmera {camera.cameraLocation}</h2>
@@ -194,7 +191,6 @@ const Streaming = () => {
           </div>
         </div>
 
-        {/* Right side - Cat Activities */}
         <div className="w-full lg:w-80">
           <ActivityList 
             title="Atividades nesta câmera"
