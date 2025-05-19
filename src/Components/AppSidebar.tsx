@@ -230,7 +230,7 @@ const QuickViewSection = ({ markedCats, loading, onCatClick }: QuickViewSectionP
               {markedCats.length > 4 && (
                 <div
                   className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors text-gray-400 cursor-pointer"
-                  onClick={() => onCatClick('marked')}
+                  onClick={() => onCatClick('')} // Futuramente implementar filtros e levar direto com filtro marked ativado
                 >
                   <Star size={16} className="mr-2" />
                   <span className="text-sm">Ver mais {markedCats.length - 4} gatos marcados</span>

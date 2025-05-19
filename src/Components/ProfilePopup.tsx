@@ -17,6 +17,11 @@ const ProfilePopup = ({ isOpen, onClose, userName = 'Usuário' }: ProfilePopupPr
   const navigate = useNavigate();
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [commentsViewOpen, setCommentsViewOpen] = useState(false);
+
+    const handleProfileClick = () => {
+    onClose();
+    navigate('/profile');
+  };
   
   useEffect(() => {
     if (!isOpen) {
@@ -81,10 +86,13 @@ const ProfilePopup = ({ isOpen, onClose, userName = 'Usuário' }: ProfilePopupPr
         </div>
         
         <div className="py-1">
-          <button className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-800">
-            <User size={16} className="mr-2" />
-            <span>Perfil</span>
-          </button>
+          <button 
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-800"
+              onClick={handleProfileClick}
+            >
+              <User size={16} className="mr-2" />
+              <span>Perfil</span>
+            </button>
           <button 
             className="flex items-center w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-800"
             onClick={handleViewComments}

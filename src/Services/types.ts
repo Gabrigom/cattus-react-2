@@ -124,9 +124,10 @@ export interface Employee {
   _id: string;
   employeeName: string;
   employeeEmail: string;
+  employeePassword?: string;
   employeePicture: string;
   employeeAccessLevel: number;
-  company: string;
+  company: string | Company;
 }
 
 export interface Feedback {

@@ -14,6 +14,7 @@ import Reports from './Pages/Reports';
 import Membership from './Pages/Membership';
 import LoginPage from './Pages/LoginPage';
 import LoadingSplash from './Pages/LoadingSplash';
+import ProfilePage from './Pages/ProfilePage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -68,6 +69,7 @@ function App() {
                   <Route path="reports" element={<Reports />} />
                   <Route path="membership" element={<Membership />} />
                   <Route path="streaming/:id" element={<Streaming />} />
+                  <Route path="profile" element={<ProfilePage />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

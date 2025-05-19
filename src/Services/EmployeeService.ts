@@ -10,8 +10,12 @@ const getOne = (id: string): Promise<Employee> =>
 const create = (formData: FormData): Promise<EmployeeResponse> => 
     postDataFormData<EmployeeResponse>('/employee/create', formData, "Funcionário cadastrado com sucesso!");
 
-const update = (id: string, data: Partial<Employee>): Promise<EmployeeResponse> => 
-    updateData<EmployeeResponse>('/employee/update/', id, data, "Dados do funcionário atualizados com sucesso!");
+const update = (id: string, data: Partial<Employee> | FormData): Promise<EmployeeResponse> => {
+    if (data instanceof FormData) {
+        return postDataFormData<EmployeeResponse>(`/employee/update/${id}`, data, "Dados do funcionário atualizados com sucesso!");
+    }
+    return updateData<EmployeeResponse>('/employee/update/', id, data, "Dados do funcionário atualizados com sucesso!");
+};
 
 const remove = (id: string): Promise<boolean> => 
     deleteData('/employee/delete/', id, "Funcionário removido com sucesso!");
