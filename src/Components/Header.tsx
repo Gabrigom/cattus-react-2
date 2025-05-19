@@ -22,6 +22,7 @@ const Header = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState<string>('/imgs/profile_sample.png');
+  const [userCompany, setUserCompany] = useState<string | ''>('')
   const profileBtnRef = useRef<HTMLButtonElement>(null);
  
   const location = useLocation();
@@ -31,12 +32,14 @@ const Header = () => {
     const token = Cookies.get('token');
     if (token) {
       try {
-        const decoded = jwtDecode<JwtPayload>(token);
+        const decoded = jwtDecode<JwtPayload>(token);        
         const name = decoded.name || 'Usuário';
         setUserName(name);
         if (decoded.picture){
           setProfilePicture(decoded.picture);
         }
+        if (decoded.company) setUserCompany(decoded.company)
+
       } catch (error) {
         console.error('Error decoding token:', error);
       }
@@ -102,7 +105,9 @@ const Header = () => {
       </form>
      
       <div className="flex items-center space-x-4">
-        <Notification />
+        {userCompany && (
+          <Notification token={Cookies.get('token')} company={userCompany} />
+        )}
        
         <div className="relative">
           <Button

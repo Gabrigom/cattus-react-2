@@ -67,7 +67,7 @@ export interface Camera {
   cameraStatus: number;
   cameraLocation: string;
   cameraDescription: string;
-  cameraPicture: string;
+  cameraUrl: string;
   company: string;
 }
 

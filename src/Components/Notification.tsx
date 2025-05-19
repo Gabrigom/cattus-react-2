@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bell, X } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { Switch } from '@/Components/ui/switch';
@@ -20,75 +20,106 @@ interface NotificationItem {
   type?: 'improvement' | 'decline' | 'same';
 }
 
-const Notification = () => {
+interface NotificationProps {
+  token: string;
+  company: string;
+}
+
+const Notification: React.FC<NotificationProps> = ({ token, company }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
-  
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: '1',
-      catId: '0001',
-      catName: 'Pompeu',
-      catImageUrl: '/public/imgs/cat_sample.jpg',
-      newStatus: 'critical',
-      reason: 'falta de alimentação',
-      date: '29/01',
-      time: '11:27',
-      isRead: false,
-      type: 'decline'
-    },
-    {
-      id: '2',
-      catId: '0002',
-      catName: 'Pompeu',
-      catImageUrl: '/public/imgs/cat_sample.jpg',
-      prevStatus: 'critical',
-      newStatus: 'healthy',
-      reason: '',
-      date: '29/01',
-      time: '11:27',
-      isRead: false,
-      type: 'improvement'
-    },
-    {
-      id: '3',
-      catId: '0003',
-      catName: 'Pompeu',
-      catImageUrl: '/public/imgs/cat_sample.jpg',
-      prevStatus: 'attention',
-      newStatus: 'attention',
-      reason: 'falta de alimentação',
-      date: '30/01',
-      time: '18:33',
-      isRead: false,
-      type: 'same'
-    },
-    {
-      id: '4',
-      catId: '0004',
-      catName: 'Pompeu',
-      catImageUrl: '/public/imgs/cat_sample.jpg',
-      prevStatus: 'critical',
-      newStatus: 'healthy',
-      reason: '',
-      date: '29/01',
-      time: '11:27',
-      isRead: true,
-      type: 'improvement'
-    },
-    {
-      id: '5',
-      catId: '0005',
-      catName: 'Pompeu',
-      catImageUrl: '/public/imgs/cat_sample.jpg',
-      newStatus: 'attention',
-      reason: 'falta de alimentação',
-      date: '30/01',
-      time: '18:33',
-      isRead: true,
-      type: 'same'
-    }
-  ]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const socketRef = useRef<WebSocket | null>(null);
+
+  function formatDateTime(timestamp: string): { date: string; time: string } {
+    const dateObj = new Date(timestamp);
+
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Janeiro é 0!
+    const year = dateObj.getFullYear();
+
+    const hours = String(dateObj.getHours()).padStart(2, '0');
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+    const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+
+    // Formatar
+    const date = `${day}/${month}/${year}`;
+    const time = `${hours}:${minutes}:${seconds}`;
+
+    return { date, time };
+  }
+
+  function mapNotificationItem(item: any): NotificationItem {
+    const { date, time } = formatDateTime(item.notificationDate);
+
+    const typeMap: Record<string, 'improvement' | 'decline' | 'same'> = {
+      up: 'improvement',
+      down: 'decline',
+      same: 'same',
+    };
+
+    const statusMap: Record<number, 'healthy' | 'attention' | 'critical'> = {
+      0: 'healthy',
+      1: 'attention',
+      2: 'critical',
+    };
+
+    return {
+      id: item._id,
+      catId: item.notificationOrigin._id,
+      catName: item.notificationOrigin.petName,
+      catImageUrl: item.notificationOrigin.petPicture,
+      newStatus: statusMap[item.notificationOrigin.petStatus.petCurrentStatus],
+      reason: item.notificationDescription,
+      date,
+      time,
+      isRead: item.notificationStatus,
+      type: typeMap[item.notificationDirection] ?? undefined,
+    };
+  }
+
+  async function getNotifications(company: string, token: string) {
+    const request = await fetch(`http://ec2-52-15-64-33.us-east-2.compute.amazonaws.com/notification/select-all/${company}`, {
+      headers: { "Authorization": token }
+    });
+    const response = await request.json();
+    const data: NotificationItem[] = response.result.map(mapNotificationItem);
+    setNotifications(data)
+  }
+
+  useEffect(() => {
+    getNotifications(company, token)
+
+    const ws = new WebSocket(`ws://127.0.0.1:8000/ws/notifications?token=${token}`);
+    socketRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('[WS] Conectado ao servidor');
+    };
+
+    ws.onmessage = async (event) => {
+      try {
+        if (event.data == "nova_notificacao") {
+          console.log("[WS] Nova notificação recebida — buscando atualizações...");
+          getNotifications(company, token)
+        }
+      } catch (error) {
+        console.error('[WS] Erro ao processar mensagem:', error);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('[WS] Conexão encerrada');
+    };
+
+    ws.onerror = (e) => {
+      console.error('[WS] Erro:', e);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [token]);
 
   const unreadCount = notifications.filter(notif => !notif.isRead).length;
 
@@ -108,9 +139,9 @@ const Notification = () => {
 
   return (
     <div className="relative">
-      <Button 
-        variant="ghost" 
-        size="icon" 
+      <Button
+        variant="ghost"
+        size="icon"
         className="relative text-gray-300 hover:text-white hover:bg-gray-800"
         onClick={toggleNotifications}
       >
@@ -126,8 +157,8 @@ const Notification = () => {
         <div className="absolute right-0 mt-2 w-96 bg-gray-900 rounded-md shadow-lg z-50 overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
             <h3 className="text-lg font-medium text-white">Notificações</h3>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
               className="text-white hover:bg-gray-700"
@@ -138,8 +169,8 @@ const Notification = () => {
 
           <div className="px-4 py-2 flex items-center justify-between border-b border-gray-800">
             <span className="text-sm text-gray-300">Mostrar não lidos</span>
-            <Switch 
-              checked={showUnreadOnly} 
+            <Switch
+              checked={showUnreadOnly}
               onCheckedChange={setShowUnreadOnly}
             />
           </div>
@@ -147,7 +178,7 @@ const Notification = () => {
           <div className="max-h-96 overflow-y-auto p-2">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map(notification => (
-                <StatusChange 
+                <StatusChange
                   key={notification.id}
                   catId={notification.catId}
                   catName={notification.catName}

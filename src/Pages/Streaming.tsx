@@ -155,7 +155,7 @@ const Streaming = () => {
           <div className="mb-4">
             <VideoPlayer 
               isActive={camera.cameraStatus === 1} 
-              imageUrl={camera.cameraPicture || '/imgs/camera_sample.jpg'} 
+              imageUrl={camera.cameraUrl || '/imgs/camera_sample.jpg'} 
               title={camera.cameraLocation} 
             />
           </div>
