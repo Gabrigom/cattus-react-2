@@ -23,11 +23,10 @@ const Header = () => {
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState<string>('/imgs/profile_sample.png');
   const profileBtnRef = useRef<HTMLButtonElement>(null);
-  
-  // Use location to determine if we're on the home page
+ 
   const location = useLocation();
   const isHomePage = location.pathname === '/home' || location.pathname === '/';
-  
+ 
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
@@ -35,7 +34,6 @@ const Header = () => {
         const decoded = jwtDecode<JwtPayload>(token);
         const name = decoded.name || 'Usuário';
         setUserName(name);
-
         if (decoded.picture){
           setProfilePicture(decoded.picture);
         }
@@ -44,31 +42,50 @@ const Header = () => {
       }
     }
   }, []);
-  
+ 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
+   
     const searchEvent = new CustomEvent('cat-search', {
       detail: { query: searchQuery }
     });
-    
+   
     document.dispatchEvent(searchEvent);
   };
+ 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showProfileMenu && 
+          profileBtnRef.current && 
+          !profileBtnRef.current.contains(event.target as Node)) {
+
+        const popupElement = document.querySelector('[data-profile-popup="true"]');
+        if (popupElement && !popupElement.contains(event.target as Node)) {
+          setShowProfileMenu(false);
+        }
+      }
+    };
+   
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileMenu]);
   
   const toggleProfileMenu = () => {
     setShowProfileMenu(prev => !prev);
   };
-  
+ 
   const closeProfileMenu = () => {
     setShowProfileMenu(false);
   };
-  
+ 
   return (
-    <header 
+    <header
       className={`h-16 flex items-center justify-between px-6 ${
-        isHomePage ? 'bg-transparent' : 'bg-black border-b border-gray-800' 
+        isHomePage ? 'bg-transparent' : 'bg-black border-b border-gray-800'
       }`}
-      style={isHomePage ? { 
+      style={isHomePage ? {
         background: 'linear-gradient(to bottom, rgb(60, 128, 84) 0%, rgb(55, 113, 75) 100%)'
       } : {}}
     >
@@ -83,25 +100,25 @@ const Header = () => {
           />
         </div>
       </form>
-      
+     
       <div className="flex items-center space-x-4">
         <Notification />
-        
+       
         <div className="relative">
-          <Button 
+          <Button
             ref={profileBtnRef}
-            variant="ghost" 
+            variant="ghost"
             className="p-0 h-auto hover:bg-transparent"
             onClick={toggleProfileMenu}
           >
             <img
               src={profilePicture}
               alt="Profile picture"
-              className="w-8 h-8 rounded-full"
+              className="w-8 h-9 rounded-full"
             />
           </Button>
-          
-          <ProfilePopup 
+         
+          <ProfilePopup
             isOpen={showProfileMenu}
             onClose={closeProfileMenu}
             userName={userName}

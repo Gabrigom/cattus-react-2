@@ -13,7 +13,6 @@ const CatData = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  // State
   const [cat, setCat] = useState<Animal | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,11 +42,9 @@ const CatData = () => {
       setReportLoading(true);
       await ReportService.getAnimalReport(cat._id, options);
       toast.success('Relatório gerado com sucesso!');
-      // Close modal after successful generation
       setReportModalOpen(false);
     } catch (error) {
       console.error('Error generating report:', error);
-      // Error toast is already shown in the service
     } finally {
       setReportLoading(false);
     }

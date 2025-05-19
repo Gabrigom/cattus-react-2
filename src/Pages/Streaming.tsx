@@ -65,14 +65,11 @@ const Streaming = () => {
       
       try {
         setLoadingActivities(true);
-        // Fetch activities for this camera
         const activities = await ActivityService.getByCameraId(id);
         
-        // Transform activities into ActivityItems for the ActivityList component
         const activityItems: ActivityItem[] = await Promise.all(activities.map(async (activity) => {
           const animal = activity.activityAuthor as Animal;
           
-          // Format the timestamps
           const startDate = new Date(activity.activityData.activityStart);
           const formattedDate = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}`;
           const formattedTime = `${startDate.getHours().toString().padStart(2, '0')}h${startDate.getMinutes().toString().padStart(2, '0')}`;

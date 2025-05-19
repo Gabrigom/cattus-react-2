@@ -28,7 +28,6 @@ const StatusChange = ({
   isRead,
   type
 }: StatusChangeProps) => {
-  // Determine if this is an improvement or decline in status
   const determineChangeType = (): 'improvement' | 'decline' | 'same' => {
     if (!prevStatus || prevStatus === newStatus) {
       return 'same';
@@ -46,7 +45,6 @@ const StatusChange = ({
   
   const changeType = type || determineChangeType();
 
-  // Get action text based on status change
   const getActionText = () => {
     if (!prevStatus) {
       return `entrou em`;
@@ -66,7 +64,6 @@ const StatusChange = ({
     return `mudou para`;
   };
   
-  // Get status text with proper formatting
   const getFormattedStatusText = () => {
     if (newStatus === 'healthy' && changeType === 'improvement') {
       return `estado saudável`;
@@ -83,7 +80,6 @@ const StatusChange = ({
     return `estado ${getStatusText(newStatus)}`;
   };
 
-  // Get status text
   const getStatusText = (status: StatusType): string => {
     switch (status) {
       case 'healthy':
@@ -97,15 +93,14 @@ const StatusChange = ({
     }
   };
 
-  // Get status color
   const getStatusColor = (status: StatusType): string => {
     switch (status) {
       case 'healthy':
-        return '#42AA49'; // Green
+        return '#42AA49';
       case 'attention':
-        return '#FED400'; // Yellow
+        return '#FED400';
       case 'critical':
-        return '#FF0200'; // Red
+        return '#FF0200';
       default:
         return '';
     }

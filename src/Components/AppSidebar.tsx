@@ -156,13 +156,13 @@ const calculateAge = (birthDate?: Date): number => {
 };
 
 const getStatusColor = (status?: string): string => {
-  if (!status) return '#42AA49'; // Default to green (healthy)
+  if (!status) return '#42AA49';
   
   switch (status) {
-    case '0': return '#42AA49'; // Green for healthy
-    case '1': return '#FED400'; // Yellow for attention
-    case '2': return '#FF0200'; // Red for critical
-    default: return '#42AA49';  // Default to green
+    case '0': return '#42AA49'; 
+    case '1': return '#FED400';
+    case '2': return '#FF0200'; 
+    default: return '#42AA49'; 
   }
 };
 

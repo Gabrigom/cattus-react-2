@@ -129,6 +129,18 @@ export interface Employee {
   company: string;
 }
 
+export interface Feedback {
+    _id: string;
+    feedbackText: string;
+    feedbackDate: Date;
+    feedbackAuthor?: string | {
+        _id: string;
+        employeeName: string;
+        employeeEmail?: string;
+        employeePicture?: string;
+    };
+}
+
 export interface EmployeeResponse extends ApiResponse {
   result?: Employee | Employee[];
 }
