@@ -18,7 +18,7 @@ const getAverageActivity = (interval: string): Promise<any> =>
     getData<any>(`/activity/charts/average-animal-activity/${interval}`);
 
 const getByCameraId = (cameraId: string): Promise<Activity[]> =>
-    getData<Activity[]>(`/activity/select-by-camera/${cameraId}`);
+    getData<Activity[]>(`/activity/select-all-camera/${cameraId}`);
 
 export default {
     getAll,

@@ -3,6 +3,7 @@ import { Bell, X } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { Switch } from '@/Components/ui/switch';
 import StatusChange from './StatusChange';
+import { initWebSocket, addWebSocketListener, removeWebSocketListener } from '../utils/websocket';
 
 type StatusType = 'critical' | 'attention' | 'healthy';
 
@@ -29,8 +30,7 @@ const Notification: React.FC<NotificationProps> = ({ token, company }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const socketRef = useRef<WebSocket | null>(null);
-
+  
   function formatDateTime(timestamp: string): { date: string; time: string } {
     const dateObj = new Date(timestamp);
 
@@ -90,35 +90,17 @@ const Notification: React.FC<NotificationProps> = ({ token, company }) => {
   useEffect(() => {
     getNotifications(company, token)
 
-    const ws = new WebSocket(`ws://127.0.0.1:8000/ws/notifications?token=${token}`);
-    socketRef.current = ws;
-
-    ws.onopen = () => {
-      console.log('[WS] Conectado ao servidor');
-    };
-
-    ws.onmessage = async (event) => {
-      try {
-        if (event.data == "nova_notificacao") {
-          console.log("[WS] Nova notificação recebida — buscando atualizações...");
-          getNotifications(company, token)
-        }
-      } catch (error) {
-        console.error('[WS] Erro ao processar mensagem:', error);
+    initWebSocket(token);
+    const refreshNotifications = (event: MessageEvent) => {
+      if (event.data === 'nova_notificacao') {
+        console.log('[Notificações] Nova notificação');
+        getNotifications(company, token)
       }
     };
 
-    ws.onclose = () => {
-      console.log('[WS] Conexão encerrada');
-    };
+    addWebSocketListener(refreshNotifications);
 
-    ws.onerror = (e) => {
-      console.error('[WS] Erro:', e);
-    };
-
-    return () => {
-      ws.close();
-    };
+    return () => removeWebSocketListener(refreshNotifications);
   }, [token]);
 
   const unreadCount = notifications.filter(notif => !notif.isRead).length;

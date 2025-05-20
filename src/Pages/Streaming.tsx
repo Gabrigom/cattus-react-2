@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Lock } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -9,6 +9,8 @@ import { CameraService, ActivityService, AnimalService } from '@/Services';
 import { Camera, Activity, Animal } from '@/Services/types';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
+import { initWebSocket, addWebSocketListener, removeWebSocketListener } from '../utils/websocket';
+
 
 interface JwtPayload {
   accessLevel?: number;
@@ -19,13 +21,44 @@ const Streaming = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isUserAdmin, setIsUserAdmin] = useState(false);
-  
+
   const [camera, setCamera] = useState<Camera | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [catActivities, setCatActivities] = useState<ActivityItem[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
-  
+
+  async function getActivities(id: string, camera: Camera | null) {
+  const activities = await ActivityService.getByCameraId(id);
+
+  const activityItems: ActivityItem[] = await Promise.all(activities.map(async (activity) => {
+    const animal = activity.activityAuthor as Animal;
+
+    const startDate = new Date(activity.activityData.activityStart);
+    const formattedDate = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    const formattedTime = `${startDate.getHours().toString().padStart(2, '0')}h${startDate.getMinutes().toString().padStart(2, '0')}`;
+
+    return {
+      id: activity._id,
+      title: animal.petName,
+      subtitle: `${animal.petGender} · ${calculateAge(animal.petBirth)} anos`,
+      imageUrl: animal.petPicture || '/imgs/cat_sample.jpg',
+      timestamp: {
+        date: formattedDate,
+        time: formattedTime
+      },
+      catId: animal._id,
+      metadata: {
+        status: getStatusText(animal.petStatus?.petCurrentStatus),
+        location: camera?.cameraLocation || 'Área não especificada',
+        activityName: activity.activityData.activityName
+      }
+    };
+  }));
+
+  setCatActivities(activityItems);
+}
+
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
@@ -62,48 +95,38 @@ const Streaming = () => {
   useEffect(() => {
     const fetchCameraActivities = async () => {
       if (!id) return;
-      
+
       try {
         setLoadingActivities(true);
-        const activities = await ActivityService.getByCameraId(id);
-        
-        const activityItems: ActivityItem[] = await Promise.all(activities.map(async (activity) => {
-          const animal = activity.activityAuthor as Animal;
-          
-          const startDate = new Date(activity.activityData.activityStart);
-          const formattedDate = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}`;
-          const formattedTime = `${startDate.getHours().toString().padStart(2, '0')}h${startDate.getMinutes().toString().padStart(2, '0')}`;
-          
-          return {
-            id: activity._id,
-            title: animal.petName,
-            subtitle: `${animal.petGender} · ${calculateAge(animal.petBirth)} anos`,
-            imageUrl: animal.petPicture || '/imgs/cat_sample.jpg',
-            timestamp: {
-              date: formattedDate,
-              time: formattedTime
-            },
-            catId: animal._id,
-            metadata: {
-              status: getStatusText(animal.petStatus?.petCurrentStatus),
-              location: camera?.cameraLocation || 'Área não especificada',
-              activityName: activity.activityData.activityName
-            }
-          };
-        }));
-        
-        setCatActivities(activityItems);
+        await getActivities(id, camera);
         setLoadingActivities(false);
       } catch (error) {
         console.error('Error fetching camera activities:', error);
         setLoadingActivities(false);
       }
     };
-    
+
     if (camera) {
       fetchCameraActivities();
     }
   }, [camera, id]);
+
+  useEffect(() => {
+    const token = Cookies.get('token')
+    initWebSocket(token);
+    const refreshActivities = async (event: MessageEvent) => {
+      if (event.data === 'nova_atividade') {
+        console.log('[Atividades] Nova atividade');
+        setLoadingActivities(true);
+        await getActivities(id, camera);
+        setLoadingActivities(false);
+      }
+    };
+
+    addWebSocketListener(refreshActivities);
+
+    return () => removeWebSocketListener(refreshActivities);
+  }, [id]);
 
   const toggleCameraStatus = async () => {
     if (!camera || !isUserAdmin) return;
@@ -136,7 +159,7 @@ const Streaming = () => {
     return (
       <div className="p-6">
         <p className="text-xl text-gray-400">{error || 'Câmera não encontrada.'}</p>
-        <Button 
+        <Button
           onClick={() => navigate('/cameras')}
           className="mt-4 bg-green-600 hover:bg-green-700"
         >
@@ -153,10 +176,10 @@ const Streaming = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1">
           <div className="mb-4">
-            <VideoPlayer 
-              isActive={camera.cameraStatus === 1} 
-              imageUrl={camera.cameraUrl || '/imgs/camera_sample.jpg'} 
-              title={camera.cameraLocation} 
+            <VideoPlayer
+              isActive={camera.cameraStatus === 1}
+              imageUrl={camera.cameraUrl || '/imgs/camera_sample.jpg'}
+              title={camera.cameraLocation}
             />
           </div>
 
@@ -164,9 +187,8 @@ const Streaming = () => {
             <div className="flex justify-between items-start mb-2">
               <h2 className="text-2xl font-bold text-white">Câmera {camera.cameraLocation}</h2>
               <Button
-                className={`${
-                  camera.cameraStatus === 1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-                } text-white`}
+                className={`${camera.cameraStatus === 1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                  } text-white`}
                 disabled={!isUserAdmin}
                 onClick={toggleCameraStatus}
               >
@@ -177,10 +199,9 @@ const Streaming = () => {
             <p className="text-gray-300 mb-2">{camera.cameraDescription || 'Sem descrição disponível'}</p>
             <div className="flex items-center">
               <span className="text-gray-400 mr-2">Estado:</span>
-              <Badge 
-                className={`${
-                  camera.cameraStatus === 1 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-                } hover:bg-opacity-20`}
+              <Badge
+                className={`${camera.cameraStatus === 1 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                  } hover:bg-opacity-20`}
               >
                 {camera.cameraStatus === 1 ? 'Ativa' : 'Inativa'}
               </Badge>
@@ -189,7 +210,7 @@ const Streaming = () => {
         </div>
 
         <div className="w-full lg:w-80">
-          <ActivityList 
+          <ActivityList
             title="Atividades nesta câmera"
             items={catActivities}
             maxHeight="500px"
@@ -204,22 +225,22 @@ const Streaming = () => {
 
 const calculateAge = (birthDate?: Date): number => {
   if (!birthDate) return 0;
-  
+
   const birth = new Date(birthDate);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-  
+
   return age;
 };
 
 const getStatusText = (status?: string): string => {
   if (!status) return 'Saudável';
-  
+
   switch (status) {
     case '0': return 'Saudável';
     case '1': return 'Em atenção';
