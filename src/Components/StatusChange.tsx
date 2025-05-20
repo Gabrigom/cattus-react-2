@@ -150,14 +150,13 @@ const StatusChange = ({
             </span>
             {reason && (
               <>
-                {' '}por{' '}
                 <span className="font-semibold">
-                  falta de alimentação
+                  : {reason}
                 </span>
                 .
               </>
             )}
-            {newStatus === 'healthy' && changeType === 'improvement' && '. Parabéns, Pompeu!'}
+            {newStatus === 'healthy' && changeType === 'improvement' && ` Parabéns, ${catName}!`}
           </div>
         </div>
         
