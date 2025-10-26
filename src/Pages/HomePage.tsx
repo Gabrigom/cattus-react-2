@@ -67,10 +67,16 @@ const HomePage = () => {
   const getStatusText = useCallback((status?: string): string => {
     if (!status) return 'Saudável';
     
+    // Handle both old numeric values and new enum values
     switch (status) {
+      // Old numeric values (legacy support)
       case '0': return 'Saudável';
       case '1': return 'Em atenção';
       case '2': return 'Crítico';
+      // New enum values
+      case 'ok': return 'Saudável';
+      case 'alert': return 'Em atenção';
+      case 'danger': return 'Crítico';
       default: return 'Saudável';
     }
   }, []);
@@ -186,10 +192,16 @@ const HomePage = () => {
   const mapCatStatus = (status?: string): 'healthy' | 'attention' | 'critical' => {
     if (!status) return 'healthy';
     
+    // Handle both old numeric values and new enum values
     switch (status) {
+      // Old numeric values (legacy support)
       case '0': return 'healthy';
       case '1': return 'attention';
       case '2': return 'critical';
+      // New enum values
+      case 'ok': return 'healthy';
+      case 'alert': return 'attention';
+      case 'danger': return 'critical';
       default: return 'healthy';
     }
   };

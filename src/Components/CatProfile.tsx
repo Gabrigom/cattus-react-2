@@ -13,26 +13,11 @@ interface Cat {
   age: number;
   description: string;
   profilePicture: string;
-  isCastrated: boolean;
-  race: string;
-  color: string;
-  fur: string;
-  size: number;
   weight: number;
-  personality: string;
-  activityLevel: string;
-  behaviour: string;
-  meowLevel: string;
   comorbidities: string[];
-  vaccine: string;
+  vaccines: string[];
   marked: boolean;
   status: 'healthy' | 'attention' | 'critical';
-  lastEditedBy?: {
-    employeeName: string;
-    _id: string;
-  };
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 interface CatProfileProps {
@@ -74,10 +59,10 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
     
     try {
       const response = await AnimalService.update(cat.id, {
-        petFavorite: newMarkedState
+        favorite: newMarkedState
       });
       
-      if (response.ok) {
+      if (response.success) {
         toast.success(newMarkedState ? 'Gato marcado com sucesso!' : 'Gato desmarcado com sucesso!');
       } else {
         setIsMarked(!newMarkedState);
@@ -140,12 +125,10 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
             </div>
           </div>
 
-          <div className="md:w-1/3 space-y-4">
+          <div className="md:w-1/2 space-y-4">
             <h2 className="text-2xl font-bold text-white">{cat.name}</h2>
             
             <div className="space-y-2">
-              <h3 className="text-white">Características físicas</h3>
-              
               <div className="flex items-center gap-2">
                 <span className="text-gray-400 w-1/3">Sexo:</span>
                 <div className="flex items-center">
@@ -172,68 +155,13 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
               </div>
               
               <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Castrado:</span>
-                <span className="text-white">{cat.isCastrated ? 'SIM' : 'NÃO'}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Raça:</span>
-                <span className="text-white">{cat.race}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Cor:</span>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-4 h-4 rounded-full" 
-                    style={{ backgroundColor: getFurColorHex(cat.color) }}
-                  ></div>
-                  <span className="text-white">{cat.color}</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Pelagem:</span>
-                <span className="text-white">{cat.fur}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Tamanho:</span>
-                <span className="text-white">{cat.size} cm</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
                 <span className="text-gray-400 w-1/3">Peso:</span>
                 <span className="text-white">{cat.weight} kg</span>
               </div>
             </div>
           </div>
 
-          <div className="md:w-1/3 space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-white">Características sociais</h3>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Personalidade:</span>
-                <span className="text-white">{cat.personality}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Nível de atividade:</span>
-                <span className="text-white">{cat.activityLevel}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Comportamento:</span>
-                <span className="text-white">{cat.behaviour}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 w-1/3">Nível de miado:</span>
-                <span className="text-white">{cat.meowLevel}</span>
-              </div>
-            </div>
-            
+          <div className="md:w-1/2 space-y-4">
             <div className="space-y-2">
               <h3 className="text-white">Comorbidades</h3>
               <div className="flex flex-wrap gap-2">
@@ -253,34 +181,19 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-white">Vacina</h3>
-              <div className="p-2">
-                {cat.vaccine ? (
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-white">
-                      Documento anexado: {cat.vaccine.split('/').pop() || 'Vacinacao.pdf'}
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      className="text-black border-white bg-white hover:bg-transparent hover:text-white"
-                      onClick={() => window.open(cat.vaccine, '_blank')}
+              <h3 className="text-white">Vacinas</h3>
+              <div className="flex flex-wrap gap-2">
+                {cat.vaccines && cat.vaccines.length > 0 ? (
+                  cat.vaccines.map((vaccine, index) => (
+                    <span 
+                      key={index}
+                      className="px-3 py-1 bg-green-600 text-white rounded-full text-sm"
                     >
-                      Visualizar
-                    </Button>
-                  </div>
+                      {vaccine}
+                    </span>
+                  ))
                 ) : (
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400">
-                      Nenhum documento de vacinação anexado
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      className="text-black border-white bg-white hover:bg-transparent hover:text-white"
-                      onClick={handleVaccineUpload}
-                    >
-                      Anexar
-                    </Button>
-                  </div>
+                  <span className="text-gray-400">Nenhuma vacina registrada</span>
                 )}
               </div>
             </div>
@@ -289,8 +202,9 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
         
         <div className="flex justify-between items-center mt-8">
           <div className="text-xs text-gray-400">
-            <p>Alterado por: {cat.lastEditedBy?.employeeName || "Não especificado"}</p>
-            <p>Última alteração: {formatDate(cat.updatedAt) || new Date().toLocaleDateString('pt-BR')}</p>
+            <p>Status: <span className={`font-semibold ${cat.status === 'healthy' ? 'text-green-500' : cat.status === 'attention' ? 'text-yellow-500' : 'text-red-500'}`}>
+              {cat.status === 'healthy' ? 'Saudável' : cat.status === 'attention' ? 'Em atenção' : 'Crítico'}
+            </span></p>
           </div>
           
           <div className="flex gap-2">

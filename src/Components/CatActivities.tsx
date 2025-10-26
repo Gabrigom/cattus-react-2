@@ -38,19 +38,19 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
 
     if (filterType !== 'all') {
       filtered = filtered.filter(activity => 
-        activity.activityData.activityName === filterType
+        activity.title === filterType
       );
     }
 
     if (dateRange.start) {
       filtered = filtered.filter(activity => 
-        new Date(activity.activityData.activityStart) >= new Date(dateRange.start)
+        new Date(activity.startedAt) >= new Date(dateRange.start)
       );
     }
     
     if (dateRange.end) {
       filtered = filtered.filter(activity => 
-        new Date(activity.activityData.activityStart) <= new Date(dateRange.end)
+        new Date(activity.startedAt) <= new Date(dateRange.end)
       );
     }
     
@@ -73,7 +73,7 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
     setDateRange({ start: '', end: '' });
   };
 
-  const activityTypes = ['all', ...new Set(activities.map(a => a.activityData.activityName))];
+  const activityTypes = ['all', ...new Set(activities.map(a => a.title))];
   
   if (!isExpanded) {
     return (
@@ -156,13 +156,20 @@ const CatActivities = ({ catId, isExpanded, onToggleExpand, activities = [] }: C
             <TableBody className="bg-[#324250]">
               {filteredActivities.length > 0 ? (
                 filteredActivities.map((activity) => {
-                  const startDate = new Date(activity.activityData.activityStart);
-                  const endDate = new Date(activity.activityData.activityEnd);
+                  const startDate = new Date(activity.startedAt);
+                  const endDate = new Date(activity.endedAt || activity.startedAt);
                   const duration = calculateDuration(startDate, endDate);
                   
+                  const activityTitleMap: Record<string, string> = {
+                    'eat': 'Alimentação',
+                    'sleep': 'Soneca',
+                    'defecate': 'Defecando',
+                    'urinate': 'Urinando'
+                  };
+                  
                   return (
-                    <TableRow key={activity._id} className="border-gray-600 hover:bg-[#3c4e5a]">
-                      <TableCell className="text-white">{activity.activityData.activityName}</TableCell>
+                    <TableRow key={activity.id} className="border-gray-600 hover:bg-[#3c4e5a]">
+                      <TableCell className="text-white">{activityTitleMap[activity.title] || activity.title}</TableCell>
                       <TableCell className="text-white">{formatDate(startDate)}</TableCell>
                       <TableCell className="text-white">{formatTime(startDate)}</TableCell>
                       <TableCell className="text-white">{formatDate(endDate)}</TableCell>
@@ -196,15 +203,9 @@ const formatTime = (date: Date): string => {
 
 const calculateDuration = (start: Date, end: Date): string => {
   const diff = end.getTime() - start.getTime();
+  const seconds = Math.floor(diff / 1000);
   
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}min`;
-  } else {
-    return `${minutes} min`;
-  }
+  return `${seconds}s`;
 };
 
 export default CatActivities;

@@ -220,10 +220,16 @@ const calculateAge = (birthDate?: Date): number => {
 const getStatusText = (status?: string): string => {
   if (!status) return 'Saudável';
   
+  // Handle both old numeric values and new enum values
   switch (status) {
+    // Old numeric values (legacy support)
     case '0': return 'Saudável';
     case '1': return 'Em atenção';
     case '2': return 'Crítico';
+    // New enum values
+    case 'ok': return 'Saudável';
+    case 'alert': return 'Em atenção';
+    case 'danger': return 'Crítico';
     default: return 'Saudável';
   }
 };

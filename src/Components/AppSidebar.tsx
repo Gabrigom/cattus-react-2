@@ -153,10 +153,16 @@ const calculateAge = (birthDate?: Date | string): number => {
 const getStatusColor = (status?: string): string => {
   if (!status) return '#42AA49';
   
+  // Handle both old numeric values and new enum values
   switch (status) {
+    // Old numeric values (legacy support)
     case '0': return '#42AA49'; 
     case '1': return '#FED400';
-    case '2': return '#FF0200'; 
+    case '2': return '#FF0200';
+    // New enum values
+    case 'ok': return '#42AA49';
+    case 'alert': return '#FED400';
+    case 'danger': return '#FF0200';
     default: return '#42AA49'; 
   }
 };

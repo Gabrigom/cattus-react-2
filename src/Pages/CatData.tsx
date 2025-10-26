@@ -18,7 +18,6 @@ const CatData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [reportLoading, setReportLoading] = useState(false);
   
   const [sectionsState, setSectionsState] = useState({
     profile: true,
@@ -33,20 +32,24 @@ const CatData = () => {
     });
   };
 
-  const generateReport = async (options: string[] = ['profile', 'status', 'activities']) => {
-    if (!cat?._id) {
+  const generateReport = async () => {
+    if (!cat?.id && !cat?._id) {
       toast.error('ID do gato não encontrado para gerar relatório.');
       return;
     }
     try {
-      setReportLoading(true);
-      await ReportService.getAnimalReport(cat._id, options);
+      const catId = cat.id?.toString() || cat._id || '';
+      if (!catId) {
+        toast.error('ID do gato inválido');
+        return;
+      }
+      // Note: ReportService expects (animalId, offset, limit), not options array
+      await ReportService.getAnimalReport(catId, 0, 50);
       toast.success('Relatório gerado com sucesso!');
       setReportModalOpen(false);
     } catch (error) {
       console.error('Error generating report:', error);
-    } finally {
-      setReportLoading(false);
+      toast.error('Erro ao gerar relatório');
     }
   };
 
@@ -64,7 +67,7 @@ const CatData = () => {
         const catData = await AnimalService.getOne(id);
         setCat(catData);
         
-        const activitiesData = await ActivityService.getAll(id);
+        const activitiesData = await ActivityService.getByCat(id);
         setActivities(activitiesData);
         
         setLoading(false);
@@ -102,36 +105,25 @@ const CatData = () => {
 
   const formatCatForProfile = () => {
     return {
-      id: cat._id,
-      name: cat.petName,
-      gender: cat.petGender,
-      birthDate: formatDate(cat.petBirth),
-      age: calculateAge(cat.petBirth),
-      description: cat.petObs || 'Sem descrição disponível',
-      profilePicture: cat.petPicture || 'imgs/cat_sample.jpg',
-      isCastrated: cat.petCharacteristics?.petCastrated === 'Sim',
-      race: cat.petCharacteristics?.petBreed || 'Não especificado',
-      color: cat.physicalCharacteristics?.furColor || 'Não especificado',
-      fur: cat.physicalCharacteristics?.furLength || 'Não especificado',
-      size: cat.physicalCharacteristics?.size || 0,
-      weight: cat.physicalCharacteristics?.weight || 0,
-      personality: cat.behavioralCharacteristics?.personality || 'Não especificado',
-      activityLevel: cat.behavioralCharacteristics?.activityLevel || 'Não especificado',
-      behaviour: cat.behavioralCharacteristics?.socialBehavior || 'Não especificado',
-      meowLevel: cat.behavioralCharacteristics?.meow || 'Não especificado',
-      comorbidities: cat.petComorbidities ? cat.petComorbidities.split(',').map(c => c.trim()) : [],
-      vaccine: cat.petVaccines && cat.petVaccines.length > 0 ? cat.petVaccines[0] : '',
-      marked: cat.petFavorite || false,
-      status: mapStatus(cat.petStatus?.petCurrentStatus),
-      lastEditedBy: cat.lastEditedBy,
-      updatedAt: cat.updatedAt
+      id: cat.id?.toString() || cat._id || '',
+      name: cat.name || cat.petName || 'Unknown',
+      gender: cat.sex || cat.petGender || '',
+      birthDate: formatDate(cat.birthDate || cat.petBirth),
+      age: calculateAge(cat.birthDate || cat.petBirth),
+      description: cat.observations || 'Sem descrição disponível',
+      profilePicture: cat.picture || cat.petPicture || 'imgs/cat_sample.jpg',
+      weight: cat.weight || 0,
+      comorbidities: cat.comorbidities || [],
+      vaccines: cat.vaccines || [],
+      marked: cat.favorite || false,
+      status: mapStatus(cat.status || cat.petStatus?.petCurrentStatus)
     };
   };
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">Perfil do gato - {cat.petName}</h1>
+        <h1 className="text-3xl font-bold text-white">Perfil do gato - {cat.name || cat.petName}</h1>
         <Button 
           onClick={() => setReportModalOpen(true)}
           className="bg-green-600 hover:bg-green-700 text-white"
@@ -148,13 +140,13 @@ const CatData = () => {
         />
         
         <CatStatus 
-          catId={cat._id}
+          catId={cat.id?.toString() || cat._id || ''}
           isExpanded={sectionsState.status}
           onToggleExpand={() => toggleSection('status')}
         />
         
         <CatActivities 
-          catId={cat._id}
+          catId={cat.id?.toString() || cat._id || ''}
           isExpanded={sectionsState.activities}
           onToggleExpand={() => toggleSection('activities')}
           activities={activities}
@@ -164,20 +156,20 @@ const CatData = () => {
       <ReportSettings
         open={reportModalOpen}
         onOpenChange={setReportModalOpen}
-        catId={cat._id}
+        catId={cat.id?.toString() || cat._id || ''}
         onGenerateReport={generateReport}
       />
     </div>
   );
 };
 
-const formatDate = (date?: Date): string => {
+const formatDate = (date?: Date | string): string => {
   if (!date) return '';
   const d = new Date(date);
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 };
 
-const calculateAge = (birthDate?: Date): number => {
+const calculateAge = (birthDate?: Date | string): number => {
   if (!birthDate) return 0;
   
   const birth = new Date(birthDate);
@@ -195,10 +187,16 @@ const calculateAge = (birthDate?: Date): number => {
 const mapStatus = (status?: string): 'healthy' | 'attention' | 'critical' => {
   if (!status) return 'healthy';
   
+  // Handle both old numeric values and new enum values
   switch (status) {
+    // Old numeric values (legacy support)
     case '0': return 'healthy';
     case '1': return 'attention';
     case '2': return 'critical';
+    // New enum values
+    case 'ok': return 'healthy';
+    case 'alert': return 'attention';
+    case 'danger': return 'critical';
     default: return 'healthy';
   }
 };
