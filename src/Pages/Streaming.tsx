@@ -65,34 +65,9 @@ const Streaming = () => {
       
       try {
         setLoadingActivities(true);
-        const activities = await ActivityService.getByCameraId(id);
-        
-        const activityItems: ActivityItem[] = await Promise.all(activities.map(async (activity) => {
-          const animal = activity.activityAuthor as Animal;
-          
-          const startDate = new Date(activity.activityData.activityStart);
-          const formattedDate = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}`;
-          const formattedTime = `${startDate.getHours().toString().padStart(2, '0')}h${startDate.getMinutes().toString().padStart(2, '0')}`;
-          
-          return {
-            id: activity._id,
-            title: animal.petName,
-            subtitle: `${animal.petGender} · ${calculateAge(animal.petBirth)} anos`,
-            imageUrl: animal.petPicture || '/imgs/cat_sample.jpg',
-            timestamp: {
-              date: formattedDate,
-              time: formattedTime
-            },
-            catId: animal._id,
-            metadata: {
-              status: getStatusText(animal.petStatus?.petCurrentStatus),
-              location: camera?.cameraLocation || 'Área não especificada',
-              activityName: activity.activityData.activityName
-            }
-          };
-        }));
-        
-        setCatActivities(activityItems);
+        // TODO: Implement camera-specific activities endpoint
+        // For now, fetch all activities and filter client-side or use a placeholder
+        setCatActivities([]);
         setLoadingActivities(false);
       } catch (error) {
         console.error('Error fetching camera activities:', error);
@@ -109,15 +84,15 @@ const Streaming = () => {
     if (!camera || !isUserAdmin) return;
 
     try {
-      const newStatus = camera.cameraStatus === 1 ? 2 : 1;
-      await CameraService.update(camera._id, {
-        ...camera,
-        cameraStatus: newStatus
+      // TODO: Implement camera activation/deactivation logic with new API
+      const newDeleted = !camera.deleted;
+      await CameraService.update(camera.id || camera._id || '', {
+        deleted: newDeleted
       });
 
       setCamera({
         ...camera,
-        cameraStatus: newStatus
+        deleted: newDeleted
       });
     } catch (error) {
       console.error('Error updating camera status:', error);
@@ -154,35 +129,36 @@ const Streaming = () => {
         <div className="flex-1">
           <div className="mb-4">
             <VideoPlayer 
-              isActive={camera.cameraStatus === 1} 
-              imageUrl={camera.cameraUrl || '/imgs/camera_sample.jpg'} 
-              title={camera.cameraLocation} 
+              isActive={!camera.deleted} 
+              imageUrl={camera.url || camera.thumbnail || camera.cameraPicture || '/imgs/camera_sample.jpg'} 
+              title={camera.name || camera.cameraLocation || 'Unknown Camera'} 
             />
           </div>
 
           <div className="bg-gray-900 rounded-md p-4 mb-4 w-[90%] mx-auto">
             <div className="flex justify-between items-start mb-2">
-              <h2 className="text-2xl font-bold text-white">Câmera {camera.cameraLocation}</h2>
+              <h2 className="text-2xl font-bold text-white">Câmera {camera.name || camera.cameraLocation || 'Unknown'}</h2>
               <Button
                 className={`${
-                  camera.cameraStatus === 1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                  !camera.deleted ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
                 } text-white`}
                 disabled={!isUserAdmin}
                 onClick={toggleCameraStatus}
               >
                 {!isUserAdmin && <Lock size={16} className="mr-2" />}
-                {camera.cameraStatus === 1 ? 'DESATIVAR' : 'ATIVAR'}
+                {!camera.deleted ? 'DESATIVAR' : 'ATIVAR'}
               </Button>
             </div>
-            <p className="text-gray-300 mb-2">{camera.cameraDescription || 'Sem descrição disponível'}</p>
+            {/* Description field commented out - not available in new DB */}
+            {/* <p className="text-gray-300 mb-2">{camera.description || 'Sem descrição disponível'}</p> */}
             <div className="flex items-center">
               <span className="text-gray-400 mr-2">Estado:</span>
               <Badge 
                 className={`${
-                  camera.cameraStatus === 1 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                  !camera.deleted ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
                 } hover:bg-opacity-20`}
               >
-                {camera.cameraStatus === 1 ? 'Ativa' : 'Inativa'}
+                {!camera.deleted ? 'Ativa' : 'Inativa'}
               </Badge>
             </div>
           </div>
@@ -202,7 +178,7 @@ const Streaming = () => {
   );
 };
 
-const calculateAge = (birthDate?: Date): number => {
+const calculateAge = (birthDate?: Date | string): number => {
   if (!birthDate) return 0;
   
   const birth = new Date(birthDate);

@@ -6,8 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import ProgressBar from './ProgressBar';
 import SegmentOne from './catform-segments/SegmentOne';
 import SegmentTwo from './catform-segments/SegmentTwo';
-import SegmentThree from './catform-segments/SegmentThree';
-import SegmentFour from './catform-segments/SegmentFour';
+// SegmentThree and SegmentFour removed - functionality simplified
 import { AnimalService } from '@/Services';
 import { Animal } from '@/Services/types';
 import { HelpCircle } from 'lucide-react';
@@ -58,7 +57,7 @@ const defaultFormData: Partial<Animal> = {
   petFavorite: false
 };
 
-type SegmentType = 'basic' | 'physical' | 'behavioral' | 'medical';
+type SegmentType = 'basic' | 'additional';
 
 const CatForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -68,9 +67,7 @@ const CatForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [completedSegments, setCompletedSegments] = useState<Record<SegmentType, boolean>>({
     basic: false,
-    physical: false,
-    behavioral: false,
-    medical: false,
+    additional: false,
   });
   const [progress, setProgress] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean>(Boolean(id));
@@ -100,18 +97,11 @@ const CatForm = () => {
           setIsEditing(true);
           
           const completed = {
-            basic: Boolean(catData.petName && catData.petGender),
-            physical: Boolean(
-              catData.physicalCharacteristics?.furColor || 
-              catData.physicalCharacteristics?.furLength
-            ),
-            behavioral: Boolean(
-              catData.behavioralCharacteristics?.personality || 
-              catData.behavioralCharacteristics?.activityLevel
-            ),
-            medical: Boolean(
-              catData.petVaccines?.length || 
-              catData.petComorbidities
+            basic: Boolean(catData.name || catData.petName),
+            additional: Boolean(
+              catData.weight || 
+              catData.comorbidities?.length || 
+              catData.vaccines?.length
             ),
           };
           
@@ -131,35 +121,18 @@ const CatForm = () => {
 
   const calculateProgress = (data: Partial<Animal> = formData, segments = completedSegments) => {
     let filledFields = 0;
-    let totalFields = 0;
+    let totalFields = 7; // Total optional fields we're tracking
 
-    const basicFields = ['petName', 'petGender', 'petPicture', 'petBirth'];
-    basicFields.forEach(field => {
-      totalFields++;
-      if (data[field as keyof typeof data]) filledFields++;
-    });
-
-    if (data.physicalCharacteristics) {
-      const physicalFields = ['furColor', 'furLength', 'eyeColor', 'size', 'weight'];
-      physicalFields.forEach(field => {
-        totalFields++;
-        if (data.physicalCharacteristics?.[field as keyof typeof data.physicalCharacteristics]) 
-          filledFields++;
-      });
-    }
-
-    if (data.behavioralCharacteristics) {
-      const behavioralFields = ['personality', 'activityLevel', 'socialBehavior', 'meow'];
-      behavioralFields.forEach(field => {
-        totalFields++;
-        if (data.behavioralCharacteristics?.[field as keyof typeof data.behavioralCharacteristics]) 
-          filledFields++;
-      });
-    }
-
-    totalFields += 2;
-    if (data.petVaccines?.length) filledFields++;
-    if (data.petComorbidities) filledFields++;
+    // Basic segment fields (all optional but we track them)
+    if (data.name || data.petName) filledFields++;
+    if (data.sex || data.petGender) filledFields++;
+    if (data.picture || data.petPicture) filledFields++;
+    if (data.birthDate || data.petBirth) filledFields++;
+    
+    // Additional segment fields
+    if (data.weight) filledFields++;
+    if (data.vaccines?.length || data.petVaccines?.length) filledFields++;
+    if (data.comorbidities?.length || data.petComorbidities) filledFields++;
 
     const calculatedProgress = Math.round((filledFields / totalFields) * 100);
     setProgress(calculatedProgress);
@@ -170,10 +143,8 @@ const CatForm = () => {
     setFormData(updatedData);
     
     const isCompleted = 
-      segment === 'basic' ? Boolean(updatedData.petName && updatedData.petGender) :
-      segment === 'physical' ? Boolean(updatedData.physicalCharacteristics?.furColor) :
-      segment === 'behavioral' ? Boolean(updatedData.behavioralCharacteristics?.personality) :
-      Boolean(updatedData.petVaccines?.length || updatedData.petComorbidities);
+      segment === 'basic' ? Boolean(updatedData.name || updatedData.petName) :
+      Boolean(updatedData.weight || updatedData.vaccines?.length || updatedData.comorbidities?.length);
     
     const updatedSegments = { ...completedSegments, [segment]: isCompleted };
     setCompletedSegments(updatedSegments);
@@ -186,70 +157,73 @@ const CatForm = () => {
       setIsLoading(true);
       
       if (activeSegment === 'basic' && !isEditing) {
-        const formDataToSubmit = new FormData();
+        const formDataToSubmit: Record<string, any> = {};
         
-        if (formData.petName) formDataToSubmit.append('petName', formData.petName);
-        if (formData.petGender) formDataToSubmit.append('petGender', formData.petGender);
-        if (formData.petObs) formDataToSubmit.append('petObs', formData.petObs);
+        formDataToSubmit.name = formData.name || formData.petName;
+        formDataToSubmit.sex = formData.sex || formData.petGender;
+        formDataToSubmit.observations = formData.observations || formData.petObs;
         
-        if (formData.company) {
-          formDataToSubmit.append('company', formData.company);
-        } else {
-          const token = Cookies.get('token');
-          if (token) {
-            try {
-              const decoded = jwtDecode<JwtPayload>(token);
-              if (decoded.company) {
-                formDataToSubmit.append('company', decoded.company);
-              } else {
-                toast.error('ID da empresa não encontrado');
-                setIsLoading(false);
-                return;
-              }
-            } catch (error) {
-              console.error('Error decoding token:', error);
-              toast.error('Erro ao obter ID da empresa');
+        // Status is set automatically by backend with default 'ok'
+        
+        if (formData.birthDate || formData.petBirth) {
+          const birthDate = formData.birthDate || formData.petBirth;
+          formDataToSubmit.birthDate = new Date(birthDate).toISOString();
+        }
+        
+        // Handle picture upload
+        const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
+        if (pictureInput?.files?.length) {
+          try {
+            const { uploadImageFile } = await import('@/utils/imageUpload');
+            const imageUrl = await uploadImageFile(pictureInput.files[0]);
+            
+            if (imageUrl) {
+              formDataToSubmit.picture = imageUrl;
+              console.log('Picture uploaded and URL set:', imageUrl);
+            } else {
+              toast.error('Erro ao fazer upload da imagem');
               setIsLoading(false);
               return;
             }
-          } else {
-            toast.error('Token não encontrado');
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Erro ao fazer upload da imagem');
             setIsLoading(false);
             return;
           }
+        } else {
+          // Check if there's an existing picture URL in formData
+          const existingPicture = formData.picture || formData.petPicture;
+          if (existingPicture) {
+            formDataToSubmit.picture = existingPicture;
+            console.log('Using existing picture URL:', existingPicture);
+          }
+          // Picture is optional - no error if missing
         }
         
-        formDataToSubmit.append('petStatus.petCurrentStatus', '0'); 
-        formDataToSubmit.append('petStatus.petOccurrencesQuantity', '0');
-        
-        if (formData.petBirth) {
-          const birthDate = new Date(formData.petBirth);
-          formDataToSubmit.append('petBirth', birthDate.toISOString().split('T')[0]);
-        }
-        
-        const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
-        if (pictureInput?.files?.length) {
-        const { uploadImageFile } = await import('@/utils/imageUpload');
-        const imageUrl = await uploadImageFile(pictureInput.files[0]);
-        
-        if (imageUrl) {
-          formDataToSubmit.append('petPicture', imageUrl);
-        }
-      }
+        console.log('Creating cat with data:', formDataToSubmit);
         
         const response = await AnimalService.create(formDataToSubmit);
         
-        if (response.ok && response._id) {
+        if (response.success && response.data) {
+          const catData = Array.isArray(response.data) ? response.data[0] : response.data;
+          const catId = catData.id;
           toast.success('Gato cadastrado com sucesso!');       
-          setIsEditing(true);          
-          navigate(`/cats/edit/${response._id}`, { replace: true });
           
-          setFormData(prev => ({ ...prev, _id: response._id }));
+          // Update formData with returned cat data to show picture immediately
+          setFormData({
+            ...formData,
+            ...catData,
+            id: catId,
+            _id: catId.toString()
+          });
+          
+          setIsEditing(true);          
           
           if (andContinue) {
-            setActiveSegment('physical');
+            setActiveSegment('additional');
           } else {
-            navigate(`/cats/${response._id}`);
+            navigate(`/cats/${catId}`);
           }
         } else {
           toast.error(response.message || 'Erro ao cadastrar gato');
@@ -261,13 +235,13 @@ const CatForm = () => {
         
         if (activeSegment === 'basic') {
           patchData = {
-            petName: formData.petName,
-            petGender: formData.petGender,
-            petObs: formData.petObs
+            name: formData.name || formData.petName,
+            sex: formData.sex || formData.petGender,
+            observations: formData.observations || formData.petObs
           };
           
-          if (formData.petBirth) {
-            patchData.petBirth = formData.petBirth;
+          if (formData.birthDate || formData.petBirth) {
+            patchData.birthDate = formData.birthDate || formData.petBirth;
           }
           
           const pictureInput = document.getElementById('pet-picture') as HTMLInputElement;
@@ -278,8 +252,8 @@ const CatForm = () => {
               const imageUrl = await uploadImageFile(pictureInput.files[0]);
               
               if (imageUrl) {
-                console.log('Setting petPicture URL:', imageUrl);
-                patchData.petPicture = imageUrl;
+                console.log('Setting picture URL:', imageUrl);
+                patchData.picture = imageUrl;
               }
             } catch (error) {
               console.error('Error uploading image during update:', error);
@@ -289,40 +263,12 @@ const CatForm = () => {
             }
           }
         } 
-        else if (activeSegment === 'physical') {
+        else if (activeSegment === 'additional') {
           patchData = {
-            petCharacteristics: formData.petCharacteristics,
-            physicalCharacteristics: formData.physicalCharacteristics
+            weight: formData.weight,
+            comorbidities: formData.comorbidities,
+            vaccines: formData.vaccines
           };
-        } 
-        else if (activeSegment === 'behavioral') {
-          patchData = {
-            behavioralCharacteristics: formData.behavioralCharacteristics
-          };
-        } 
-        else if (activeSegment === 'medical') {
-          patchData = {
-            petComorbidities: formData.petComorbidities
-          };
-          
-          const vaccineInput = document.getElementById('pet-vaccine') as HTMLInputElement;
-          if (vaccineInput?.files?.length) {
-            setIsLoading(true);
-            try {
-              const { uploadImageFile } = await import('@/utils/imageUpload');
-              const imageUrl = await uploadImageFile(vaccineInput.files[0]);
-              
-              if (imageUrl) {
-                console.log('Setting petVaccines URL:', imageUrl);
-                patchData.petVaccines = [imageUrl];
-              }
-            } catch (error) {
-              console.error('Error uploading vaccine during update:', error);
-              toast.error('Erro ao fazer upload do documento de vacinação');
-              setIsLoading(false);
-              return;
-            }
-          }
         }
         
         console.log('Sending PATCH data:', patchData);
@@ -330,16 +276,27 @@ const CatForm = () => {
         try {
           const response = await AnimalService.update(catId, patchData);
           
-          if (response.ok) {
+          if (response.success) {
+            const updatedData = Array.isArray(response.data) ? response.data[0] : response.data;
+            const updatedId = updatedData?.id || catId;
+            
+            // Update formData with returned cat data to show picture immediately
+            if (updatedData) {
+              setFormData({
+                ...formData,
+                ...updatedData,
+                id: updatedId,
+                _id: updatedId.toString()
+              });
+            }
+            
             toast.success('Gato atualizado com sucesso!');
             
             if (andContinue) {
-              if (activeSegment === 'basic') setActiveSegment('physical');
-              else if (activeSegment === 'physical') setActiveSegment('behavioral');
-              else if (activeSegment === 'behavioral') setActiveSegment('medical');
-              else navigate(`/cats/${response._id}`);
+              if (activeSegment === 'basic') setActiveSegment('additional');
+              else navigate(`/cats/${updatedId}`);
             } else {
-              navigate(`/cats/${response._id}`);
+              navigate(`/cats/${updatedId}`);
             }
           } else {
             toast.error(response.message || 'Erro ao atualizar gato');
@@ -419,56 +376,20 @@ const CatForm = () => {
           
           <button
             className={`w-full text-left p-4 transition-colors ${
-              activeSegment === 'physical' 
+              activeSegment === 'additional' 
                 ? 'bg-[#3c8054] text-white font-semibold' 
                 : 'text-white hover:bg-gray-800'
             } ${
-              completedSegments.physical 
+              completedSegments.additional 
                 ? 'text-green-500' 
                 : 'font-italic'
             } ${
               !isEditing ? 'opacity-50 cursor-not-allowed' : ''
             }`}
-            onClick={() => handleSegmentChange('physical')}
+            onClick={() => handleSegmentChange('additional')}
             disabled={!isEditing}
           >
-            Características físicas
-          </button>
-          
-          <button
-            className={`w-full text-left p-4 transition-colors ${
-              activeSegment === 'behavioral' 
-                ? 'bg-[#3c8054] text-white font-semibold' 
-                : 'text-white hover:bg-gray-800'
-            } ${
-              completedSegments.behavioral 
-                ? 'text-green-500' 
-                : 'font-italic'
-            } ${
-              !isEditing ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            onClick={() => handleSegmentChange('behavioral')}
-            disabled={!isEditing}
-          >
-            Comportamento social
-          </button>
-          
-          <button
-            className={`w-full text-left p-4 transition-colors ${
-              activeSegment === 'medical' 
-                ? 'bg-[#3c8054] text-white font-semibold' 
-                : 'text-white hover:bg-gray-800'
-            } ${
-              completedSegments.medical 
-                ? 'text-green-500' 
-                : 'font-italic'
-            } ${
-              !isEditing ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            onClick={() => handleSegmentChange('medical')}
-            disabled={!isEditing}
-          >
-            Carteira de vacinação e comorbidades
+            Peso, Comorbidades e Vacinas
           </button>
         </div>
 
@@ -483,32 +404,11 @@ const CatForm = () => {
             />
           )}
           
-          {activeSegment === 'physical' && (
+          {activeSegment === 'additional' && (
             <SegmentTwo
               formData={formData}
-              onChange={(data) => handleFormDataChange(data, 'physical')}
+              onChange={(data) => handleFormDataChange(data, 'additional')}
               onSaveAndFinalize={() => saveFormData(false)}
-              onSaveAndContinue={() => saveFormData(true)}
-              isLoading={isLoading}
-            />
-          )}
-          
-          {activeSegment === 'behavioral' && (
-            <SegmentThree
-              formData={formData}
-              onChange={(data) => handleFormDataChange(data, 'behavioral')}
-              onSaveAndFinalize={() => saveFormData(false)}
-              onSaveAndContinue={() => saveFormData(true)}
-              isLoading={isLoading}
-            />
-          )}
-          
-          {activeSegment === 'medical' && (
-            <SegmentFour
-              formData={formData}
-              onChange={(data) => handleFormDataChange(data, 'medical')}
-              onSaveAndFinalize={() => saveFormData(false)}
-              onSaveAndContinue={() => saveFormData(true)}
               isLoading={isLoading}
             />
           )}

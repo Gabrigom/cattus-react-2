@@ -161,7 +161,7 @@ export const updateData = async <T>(path: string, id: string, body: any, message
 
 export const uploadImage = async <T>(formData: FormData): Promise<T> => {
     try {
-        const response = await fetch(`${API_URL}/upload-image`, {
+        const response = await fetch(`${API_URL}/s3/upload-image`, {
             method: "POST",
             headers: {
                 'Authorization': `Bearer ${Cookies.get("token") || ''}`,
@@ -176,11 +176,17 @@ export const uploadImage = async <T>(formData: FormData): Promise<T> => {
             throw new Error("Sessão expirada, faça login novamente");
         }
 
+        // Accept 200-299 status codes (201 for successful creation)
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Erro ao fazer upload da imagem');
+        }
+
         const data = await response.json();
         return data as T;
     } catch (error) {
         console.error("API Error:", error);
-        toast.error("Erro ao fazer upload da imagem");
+        toast.error(error instanceof Error ? error.message : "Erro ao fazer upload da imagem");
         throw error;
     }
 };

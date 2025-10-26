@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Animal } from '@/Services/types';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
@@ -20,8 +20,16 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
   onSaveAndContinue,
   isLoading
 }) => {
-  const [imagePreview, setImagePreview] = useState<string | null>(formData.petPicture || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(formData.picture || formData.petPicture || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Update image preview when formData changes (e.g., after save)
+  useEffect(() => {
+    const newPreview = formData.picture || formData.petPicture;
+    if (newPreview) {
+      setImagePreview(newPreview);
+    }
+  }, [formData.picture, formData.petPicture]);
   
   const formatDateForInput = (date: Date | undefined): string => {
     if (!date) return '';
@@ -120,7 +128,7 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
                 onChange={handleFileChange}
               />
             </div>
-            <p className="mt-2 text-center text-sm text-gray-400">Foto de perfil*</p>
+            <p className="mt-2 text-center text-sm text-gray-400">Foto de perfil</p>
           </div>
 
           <div className="space-y-6">
@@ -130,8 +138,8 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
                 id="pet-name"
                 placeholder="Nome do gato"
                 className="bg-gray-700 border-gray-600 text-white"
-                value={formData.petName || ''}
-                onChange={(e) => handleChange('petName', e.target.value)}
+                value={formData.name || formData.petName || ''}
+                onChange={(e) => handleChange('name', e.target.value)}
                 required
               />           
             </div>
@@ -143,8 +151,8 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
                   id="pet-birth"
                   type="date"
                   className="bg-gray-700 border-gray-600 text-white"
-                  value={formatDateForInput(formData.petBirth)}
-                  onChange={(e) => handleChange('petBirth', new Date(e.target.value))}
+                  value={formatDateForInput(formData.birthDate as Date | undefined)}
+                  onChange={(e) => handleChange('birthDate', new Date(e.target.value))}
                   required
                 />       
               </div>
@@ -152,15 +160,15 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
               <div>
               <p className="mt-1 text-sm text-gray-400">Sexo*</p>
                 <Select
-                  value={formData.petGender || ''}
-                  onValueChange={(value) => handleChange('petGender', value)}
+                  value={formData.sex || formData.petGender || ''}
+                  onValueChange={(value) => handleChange('sex', value)}
                 >
                   <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 text-white border-gray-600">
-                    <SelectItem value="Macho">Macho</SelectItem>
-                    <SelectItem value="Fêmea">Fêmea</SelectItem>
+                    <SelectItem value="macho">Macho</SelectItem>
+                    <SelectItem value="fêmea">Fêmea</SelectItem>
                   </SelectContent>
                 </Select>           
               </div>
@@ -172,8 +180,8 @@ const SegmentOne: React.FC<SegmentOneProps> = ({
                 id="pet-obs"
                 placeholder="Digite aqui as observações sobre o gato..."
                 className="bg-gray-700 border-gray-600 text-white h-32 resize-none"
-                value={formData.petObs || ''}
-                onChange={(e) => handleChange('petObs', e.target.value)}
+                value={formData.observations || ''}
+                onChange={(e) => handleChange('observations', e.target.value)}
               />
               
             </div>

@@ -2,21 +2,25 @@ import { toast } from 'react-toastify';
 import { api } from '@/Services';
 
 interface ImageUploadResponse {
-  ok: boolean;
+  success: boolean;
   message: string;
-  img_url: string;
+  data?: {
+    url: string;
+    key?: string;
+    filename?: string;
+  };
 }
 
 export const uploadImageFile = async (file: File): Promise<string | null> => {
   try {
     const formData = new FormData();
-    formData.append('imagem', file);
+    formData.append('file', file);
     
     const response = await api.uploadImage<ImageUploadResponse>(formData);
     
-    if (response.ok && response.img_url) {
-      console.log('Image subida com sucesso, URL:', response.img_url);
-      return response.img_url;
+    if (response.success && response.data?.url) {
+      console.log('Image uploaded successfully, URL:', response.data.url);
+      return response.data.url;
     } else {
       toast.error(response.message || 'Erro ao fazer upload da imagem');
       console.error('Erro ao fazer upload de imagem:', response);

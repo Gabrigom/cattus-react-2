@@ -1,4 +1,4 @@
-import { getData, postDataJSON, postDataFormData, updateData, deleteData } from './api';
+import { getData, postDataJSON, updateData, deleteData } from './api';
 import { Animal, AnimalResponse } from './types';
 
 const getAll = (offset: number = 0, limit: number = 50): Promise<Animal[]> => 
@@ -7,8 +7,8 @@ const getAll = (offset: number = 0, limit: number = 50): Promise<Animal[]> =>
 const getOne = (id: string | number): Promise<Animal> => 
     getData<Animal>('/cats/', id.toString());
 
-const create = (formData: FormData): Promise<AnimalResponse> => 
-    postDataFormData<AnimalResponse>('/cats', formData, "Gato cadastrado com sucesso!");
+const create = (data: Partial<Animal>): Promise<AnimalResponse> => 
+    postDataJSON<AnimalResponse>('/cats', data, "Gato cadastrado com sucesso!");
 
 const update = (id: string | number, data: Partial<Animal>): Promise<AnimalResponse> => 
     updateData<AnimalResponse>('/cats/', id.toString(), data, "Dados do gato atualizados com sucesso!");

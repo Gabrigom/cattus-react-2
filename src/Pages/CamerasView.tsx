@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
-import Cookies from 'js-cookie';
 import CameraCard from '@/Components/CameraCard';
 import CatViewFilter from '@/Components/CatViewFilter';
 import CameraViewTooltip from '@/Components/CameraViewTooltip';
@@ -8,11 +6,6 @@ import { Button } from '@/Components/ui/button';
 import { Filter, HelpCircle } from 'lucide-react';
 import { CameraService } from '@/Services';
 import { Camera } from '@/Services/types';
-
-interface JwtPayload {
-  company?: string;
-  [key: string]: any;
-}
 
 const CamerasView = () => {
   const [filterOpen, setFilterOpen] = useState(false);
@@ -24,27 +17,12 @@ const CamerasView = () => {
     const fetchCameras = async () => {
       try {
         setLoading(true);
-        const token = Cookies.get('token');
         
-        if (!token) {
-          setError('Você precisa estar autenticado');
-          setLoading(false);
-          return;
-        }
-        
-        const decoded = jwtDecode<JwtPayload>(token);
-        const companyId = decoded.company;
-        
-        if (!companyId) {
-          setError('ID da empresa não encontrado');
-          setLoading(false);
-          return;
-        }
-        
-        const response = await CameraService.getAll(companyId);
-        const initializedCameras = response.filter(camera => camera.cameraStatus !== 0);
+        const response = await CameraService.getAll(0, 50);
+        // Filter out deleted cameras
+        const activeCameras = response.filter(camera => !camera.deleted);
 
-        setCameras(initializedCameras);
+        setCameras(activeCameras);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching cameras:', error);
@@ -105,10 +83,10 @@ const CamerasView = () => {
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {cameras.map((camera) => (
           <CameraCard
-            key={camera._id}
-            id={camera._id}
-            name={camera.cameraLocation}
-            imageUrl={camera.cameraPicture || '/imgs/camera_sample.jpg'}
+            key={camera.id || camera._id}
+            id={camera.id?.toString() || camera._id || ''}
+            name={camera.name || camera.cameraLocation || 'Unknown Location'}
+            imageUrl={camera.thumbnail || camera.cameraPicture || '/imgs/camera_sample.jpg'}
           />
         ))}
       </div>

@@ -1,17 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Animal } from '@/Services/types';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
-import { HelpCircle } from 'lucide-react';
-import { Checkbox } from '@/Components/ui/checkbox';
-import { Label } from '@/Components/ui/label';
+import { Badge } from '@/Components/ui/badge';
 
 interface SegmentTwoProps {
   formData: Partial<Animal>;
   onChange: (data: Partial<Animal>) => void;
   onSaveAndFinalize: () => void;
-  onSaveAndContinue: () => void;
   isLoading: boolean;
 }
 
@@ -19,59 +15,162 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
   formData,
   onChange,
   onSaveAndFinalize,
-  onSaveAndContinue,
   isLoading
 }) => {
-  const physicalCharacteristics = formData.physicalCharacteristics || {
-    furColor: '',
-    furLength: '',
-    eyeColor: '',
-    size: 0,
-    weight: 0,
-  };
-
-  const petCharacteristics = formData.petCharacteristics || {
-    petCastrated: '',
-    petBreed: '',
-    petSize: '',
-  };
-
-  const catName = formData.petName || 'Nome do gato';
-  const catGender = formData.petGender || '';
-  const catAge = calculateAge(formData.petBirth);
-
-  const handlePetCharacteristicsChange = (field: keyof typeof petCharacteristics, value: string) => {
-    const updatedCharacteristics = {
-      ...petCharacteristics,
-      [field]: value,
-    };
+  const catName = formData.name || formData.petName || 'Nome do gato';
+  const catGender = formData.sex || formData.petGender || '';
+  const catAge = calculateAge(formData.birthDate || formData.petBirth);
+  
+  const [selectedComorbidities, setSelectedComorbidities] = useState<string[]>(() => {
+    if (!formData.comorbidities) return [];
     
-    onChange({
-      ...formData,
-      petCharacteristics: updatedCharacteristics,
+    if (Array.isArray(formData.comorbidities)) {
+      // If array contains comma-separated strings, flatten them
+      const flattened = formData.comorbidities.flatMap((item: any) => 
+        typeof item === 'string' && item.includes(',') 
+          ? item.split(',').map((c: string) => c.trim())
+          : [item]
+      );
+      return flattened;
+    }
+    
+    // If it's a string
+    const comorbiditiesString = formData.comorbidities as string;
+    if (typeof comorbiditiesString === 'string') {
+      return comorbiditiesString.split(',').map((c: string) => c.trim());
+    }
+    
+    return [];
+  });
+
+  const [selectedVaccines, setSelectedVaccines] = useState<string[]>(() => {
+    if (!formData.vaccines) return [];
+    
+    if (Array.isArray(formData.vaccines)) {
+      // If array contains comma-separated strings, flatten them
+      const flattened = formData.vaccines.flatMap((item: any) => 
+        typeof item === 'string' && item.includes(',') 
+          ? item.split(',').map((c: string) => c.trim())
+          : [item]
+      );
+      return flattened;
+    }
+    
+    // If it's a string
+    const vaccinesString = formData.vaccines as string;
+    if (typeof vaccinesString === 'string') {
+      return vaccinesString.split(',').map((c: string) => c.trim());
+    }
+    
+    return [];
+  });
+
+  // Sync selected items when formData changes (e.g., when editing)
+  useEffect(() => {
+    if (!formData.comorbidities) {
+      setSelectedComorbidities([]);
+    } else if (Array.isArray(formData.comorbidities)) {
+      const flattened = formData.comorbidities.flatMap((item: any) => 
+        typeof item === 'string' && item.includes(',') 
+          ? item.split(',').map((c: string) => c.trim())
+          : [item]
+      );
+      setSelectedComorbidities(flattened);
+    } else if (typeof formData.comorbidities === 'string') {
+      const comorbiditiesString = formData.comorbidities as string;
+      setSelectedComorbidities(comorbiditiesString.split(',').map((c: string) => c.trim()));
+    }
+
+    if (!formData.vaccines) {
+      setSelectedVaccines([]);
+    } else if (Array.isArray(formData.vaccines)) {
+      const flattened = formData.vaccines.flatMap((item: any) => 
+        typeof item === 'string' && item.includes(',') 
+          ? item.split(',').map((c: string) => c.trim())
+          : [item]
+      );
+      setSelectedVaccines(flattened);
+    } else if (typeof formData.vaccines === 'string') {
+      const vaccinesString = formData.vaccines as string;
+      setSelectedVaccines(vaccinesString.split(',').map((c: string) => c.trim()));
+    }
+  }, [formData.comorbidities, formData.vaccines]);
+
+  const comorbidities = [
+    'TDAH',
+    'Obesa',
+    'Diabetes',
+    'Incontinência Urinária',
+    'Doença Renal Crônica',
+    'Artrite',
+    'Linfoma',
+    'Doença Inflamatória Intestinal',
+    'Infecção por FIV',
+    'Leucemia Felina (Felv)',
+    'Insuficiência Cardíaca',
+    'Hipertensão',
+    'Asma',
+    'Panleucopenia',
+    'Herpes Felino'
+  ];
+
+  const vaccines = [
+    'Raiva',
+    'Gripe felina',
+    'Felv',
+    'Tríplice Felina',
+    'Quádrupla Felina',
+    'Panleucopenia',
+    'Herpes Felino',
+    'Calicivirose'
+  ];
+
+  const toggleComorbidity = (comorbidity: string) => {
+    setSelectedComorbidities(prev => {
+      const isSelected = prev.includes(comorbidity);
+      if (isSelected) {
+        const updated = prev.filter(c => c !== comorbidity);
+        onChange({ 
+          ...formData, 
+          comorbidities: updated
+        });
+        return updated;
+      } else {
+        const updated = [...prev, comorbidity];
+        onChange({ 
+          ...formData, 
+          comorbidities: updated
+        });
+        return updated;
+      }
     });
   };
 
-  const handlePhysicalCharacteristicsChange = (field: keyof typeof physicalCharacteristics, value: any) => {
-    const updatedCharacteristics = {
-      ...physicalCharacteristics,
-      [field]: value,
-    };
-    
-    onChange({
-      ...formData,
-      physicalCharacteristics: updatedCharacteristics,
+  const toggleVaccine = (vaccine: string) => {
+    setSelectedVaccines(prev => {
+      const isSelected = prev.includes(vaccine);
+      if (isSelected) {
+        const updated = prev.filter(v => v !== vaccine);
+        onChange({ 
+          ...formData, 
+          vaccines: updated
+        });
+        return updated;
+      } else {
+        const updated = [...prev, vaccine];
+        onChange({ 
+          ...formData, 
+          vaccines: updated
+        });
+        return updated;
+      }
     });
-  };
-
-  const handleCastratedChange = (checked: boolean) => {
-    handlePetCharacteristicsChange('petCastrated', checked ? 'Sim' : 'Não');
   };
 
   return (
     <div className="bg-gray-900 rounded-md overflow-hidden">
       <div className="p-3 bg-[#3c8054] flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-white">Características físicas</h2>
+        <h2 className="text-lg font-semibold text-white">Peso, Comorbidades e Vacinas</h2>
       </div>
 
       <div className="p-6 bg-[#324250]">
@@ -83,7 +182,7 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
               
               <div className="h-72 w-full">
                 <img 
-                  src={formData.petPicture || '/imgs/cat_sample.jpg'} 
+                  src={formData.picture || formData.petPicture || '/imgs/cat_sample.jpg'} 
                   alt={`Foto de ${catName}`}
                   className="w-full h-full object-cover rounded-md"
                 />
@@ -92,147 +191,90 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
           </div>
 
           <div className="col-span-2 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-white mb-2">Raça</p>
-                <Select
-                  value={petCharacteristics.petBreed}
-                  onValueChange={(value) => handlePetCharacteristicsChange('petBreed', value)}
-                >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 text-white border-gray-600">
-                    <SelectItem value="Siamês">Siamês</SelectItem>
-                    <SelectItem value="Persa">Persa</SelectItem>
-                    <SelectItem value="Maine Coon">Maine Coon</SelectItem>
-                    <SelectItem value="Bengal">Bengal</SelectItem>
-                    <SelectItem value="Ragdoll">Ragdoll</SelectItem>
-                    <SelectItem value="Sphynx">Sphynx</SelectItem>
-                    <SelectItem value="British Shorthair">British Shorthair</SelectItem>
-                    <SelectItem value="Abissínio">Abissínio</SelectItem>
-                    <SelectItem value="SRD">SRD (Sem Raça Definida)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Weight */}
+            <div>
+              <p className="text-white mb-2">Peso (kg)</p>
+              <Input
+                type="number"
+                className="bg-gray-700 border-gray-600 text-white"
+                value={formData.weight || ''}
+                onChange={(e) => onChange({ ...formData, weight: Number(e.target.value) })}
+                min="0"
+                step="0.1"
+              />
+            </div>
 
-              <div>
-                <p className="text-white mb-2">Cor predominante</p>
-                <Select
-                  value={physicalCharacteristics.furColor}
-                  onValueChange={(value) => handlePhysicalCharacteristicsChange('furColor', value)}
-                >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 text-white border-gray-600">
-                    <SelectItem value="preta">Preta</SelectItem>
-                    <SelectItem value="branca">Branca</SelectItem>
-                    <SelectItem value="cinza">Cinza</SelectItem>
-                    <SelectItem value="laranja">Laranja</SelectItem>
-                    <SelectItem value="marrom">Marrom</SelectItem>
-                    <SelectItem value="mesclada">Mesclada</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Neutering - commented out temporarily */}
+            {/* <div className="flex items-center space-x-2">
+              <input 
+                type="checkbox" 
+                id="castrated" 
+                checked={formData.isCastrated || false}
+                onChange={(e) => onChange({ ...formData, isCastrated: e.target.checked })}
+                className="w-4 h-4"
+              />
+              <label htmlFor="castrated" className="text-white">Castrado/a?</label>
+            </div> */}
+
+            {/* Comorbidities */}
+            <div>
+              <p className="text-white mb-4">Comorbidades:</p>
+              <div className="flex flex-wrap gap-2">
+                {comorbidities.map((comorbidity) => {
+                  const isSelected = selectedComorbidities.includes(comorbidity);
+                  return (
+                    <Badge
+                      key={comorbidity}
+                      variant="outline"
+                      className={`cursor-pointer py-2 px-4 rounded-full ${
+                        isSelected 
+                          ? 'bg-purple-800 text-white border-purple-700' 
+                          : 'bg-white text-gray-800 border-gray-300'
+                      }`}
+                      onClick={() => toggleComorbidity(comorbidity)}
+                    >
+                      {comorbidity}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <p className="text-white mb-2">Tamanho (cm)</p>
-                <Input
-                  type="number"
-                  className="bg-gray-700 border-gray-600 text-white"
-                  value={physicalCharacteristics.size || ''}
-                  onChange={(e) => handlePhysicalCharacteristicsChange('size', Number(e.target.value))}
-                  min="0"
-                  step="1"
-                />
-              </div>
-
-              <div>
-                <p className="text-white mb-2">Peso (kg)</p>
-                <Input
-                  type="number"
-                  className="bg-gray-700 border-gray-600 text-white"
-                  value={physicalCharacteristics.weight || ''}
-                  onChange={(e) => handlePhysicalCharacteristicsChange('weight', Number(e.target.value))}
-                  min="0"
-                  step="0.1"
-                />
-              </div>
-
-              <div>
-                <p className="text-white mb-2">Pelagem</p>
-                <Select
-                  value={physicalCharacteristics.furLength}
-                  onValueChange={(value) => handlePhysicalCharacteristicsChange('furLength', value)}
-                >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 text-white border-gray-600">
-                    <SelectItem value="curto">Curto</SelectItem>
-                    <SelectItem value="médio">Médio</SelectItem>
-                    <SelectItem value="longo">Longo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-white mb-2">Cor dos olhos</p>
-                <Select
-                  value={physicalCharacteristics.eyeColor}
-                  onValueChange={(value) => handlePhysicalCharacteristicsChange('eyeColor', value)}
-                >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 text-white border-gray-600">
-                    <SelectItem value="azul">Azul</SelectItem>
-                    <SelectItem value="verde">Verde</SelectItem>
-                    <SelectItem value="castanho">Castanho</SelectItem>
-                    <SelectItem value="âmbar">Âmbar</SelectItem>
-                    <SelectItem value="heterocromia">Heterocromia (olhos de cores diferentes)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center">
-                <div className="flex items-center space-x-2 mt-8">
-                  <Checkbox 
-                    id="castrated" 
-                    checked={petCharacteristics.petCastrated === 'Sim'}
-                    onCheckedChange={handleCastratedChange}
-                    className="bg-white"
-                  />
-                  <Label htmlFor="castrated" className="text-white">Castrado/a?</Label>
-                </div>
+            {/* Vaccines */}
+            <div>
+              <p className="text-white mb-4">Vacinas:</p>
+              <div className="flex flex-wrap gap-2">
+                {vaccines.map((vaccine) => {
+                  const isSelected = selectedVaccines.includes(vaccine);
+                  return (
+                    <Badge
+                      key={vaccine}
+                      variant="outline"
+                      className={`cursor-pointer py-2 px-4 rounded-full ${
+                        isSelected 
+                          ? 'bg-green-600 text-white border-green-500' 
+                          : 'bg-white text-gray-800 border-gray-300'
+                      }`}
+                      onClick={() => toggleVaccine(vaccine)}
+                    >
+                      {vaccine}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 text-sm text-gray-300 text-center">
-          <p>Itens com * são OBRIGATÓRIOS</p>
-        </div>
+
 
         <div className="mt-6 flex justify-end space-x-4">
           <Button
             onClick={onSaveAndFinalize}
-            className="px-8 py-2 bg-gray-700 hover:bg-gray-600 text-white"
-            disabled={isLoading}
-          >
-            SALVAR E FINALIZAR
-          </Button>
-          <Button
-            onClick={onSaveAndContinue}
             className="px-8 py-2 bg-green-600 hover:bg-green-700 text-white"
             disabled={isLoading}
           >
-            SALVAR E PROSSEGUIR
+            SALVAR E FINALIZAR
           </Button>
         </div>
       </div>
@@ -240,7 +282,7 @@ const SegmentTwo: React.FC<SegmentTwoProps> = ({
   );
 };
 
-const calculateAge = (birthDate?: Date): number => {
+const calculateAge = (birthDate?: Date | string): number => {
   if (!birthDate) return 0;
   
   const birth = new Date(birthDate);
