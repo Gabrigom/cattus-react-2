@@ -19,23 +19,32 @@ export interface LoginResponse extends ApiResponse {
 export interface Animal {
   id: number;
   name: string;
-  birthDate: Date;
+  birthDate: string | Date;
   sex: string;
   picture: string;
   observations: string;
-  vaccines: string[];
-  comorbidities: string[];
-  weight: number;
+  vaccines?: string[];
+  comorbidities?: string[];
+  weight?: number;
   favorite: boolean;
   status: string;
-  company: Company;
-  createdBy: User;
-  updatedBy: User;
-  activities: Activity[];
-  createdAt?: Date;
-  updatedAt?: Date;
-  deleted: boolean;
-  deletedAt: Date;
+  company?: Company;
+  createdBy?: User;
+  updatedBy?: User;
+  activities?: Activity[];
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  deleted?: boolean;
+  deletedAt?: string | Date;
+  // Legacy fields for backward compatibility
+  _id?: string;
+  petName?: string;
+  petGender?: string;
+  petBirth?: string | Date;
+  petPicture?: string;
+  petStatus?: {
+    petCurrentStatus: string;
+  };
 }
 
 export interface AnimalResponse extends ApiResponse {
@@ -46,27 +55,38 @@ export interface Camera {
   id: number;
   url: string;
   name: string;
-  thumbnail: string;
-  company: Company;
-  createdBy: User;
-  createdAt: Date;
-  updatedAt: Date;
-  deleted: boolean;
-  deletedAt: Date;
+  thumbnail?: string;
+  company?: Company;
+  createdBy?: User;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  deleted?: boolean;
+  deletedAt?: string | Date;
+  // Legacy fields for backward compatibility
+  _id?: string;
+  cameraLocation?: string;
+  cameraStatus?: number;
+  cameraPicture?: string;
 }
 
 export interface CameraResponse extends ApiResponse {
   data?: Camera | Camera[];
 }
 
+export type ActivityTitleEnum = 'eat' | 'sleep' | 'defecate' | 'urinate';
+
 export interface Activity {
   id: number;
+  title: ActivityTitleEnum;
   cat: Animal;
-  camera: Camera;
-  startTime: Date;
-  endTime: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  startedAt: string | Date;
+  endedAt?: string | Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  // Legacy fields
+  camera?: Camera;
+  startTime?: string | Date;
+  endTime?: string | Date;
 }
 
 export interface ActivityResponse extends ApiResponse {

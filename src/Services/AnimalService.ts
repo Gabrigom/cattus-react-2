@@ -4,33 +4,30 @@ import { Animal, AnimalResponse } from './types';
 const getAll = (offset: number = 0, limit: number = 50): Promise<Animal[]> => 
     getData<Animal[]>(`/cats?offset=${offset}&limit=${limit}`);
 
-const getOne = (id: string): Promise<Animal> => 
-    getData<Animal>('/cats/', id);
+const getOne = (id: string | number): Promise<Animal> => 
+    getData<Animal>('/cats/', id.toString());
 
 const create = (formData: FormData): Promise<AnimalResponse> => 
     postDataFormData<AnimalResponse>('/cats', formData, "Gato cadastrado com sucesso!");
 
-const update = (id: string, data: Partial<Animal>): Promise<AnimalResponse> => 
-    updateData<AnimalResponse>('/cats/', id, data, "Dados do gato atualizados com sucesso!");
+const update = (id: string | number, data: Partial<Animal>): Promise<AnimalResponse> => 
+    updateData<AnimalResponse>('/cats/', id.toString(), data, "Dados do gato atualizados com sucesso!");
 
-const remove = (id: string): Promise<boolean> => 
-    deleteData('/cats/', id, "Gato removido com sucesso!");
+const remove = (id: string | number): Promise<boolean> => 
+    deleteData('/cats/', id.toString(), "Gato removido com sucesso!");
 
-const softDelete = (id: string): Promise<AnimalResponse> => 
-    updateData<AnimalResponse>('/cats/', id, {}, "Gato removido com sucesso!");
+const softDelete = (id: string | number): Promise<AnimalResponse> => 
+    updateData<AnimalResponse>('/cats/', id.toString(), {}, "Gato removido com sucesso!");
 
-const changeFavorite = (id: string): Promise<AnimalResponse> => 
-    updateData<AnimalResponse>('/cats/', id, {}, "Favorito atualizado com sucesso!");
+const changeFavorite = (id: string | number): Promise<AnimalResponse> => 
+    updateData<AnimalResponse>('/cats/', id.toString(), {}, "Favorito atualizado com sucesso!");
 
-const generateReport = (id: string, offset: number = 0, limit: number = 50): Promise<any> => 
+const generateReport = (id: string | number, offset: number = 0, limit: number = 50): Promise<any> => 
     getData<any>(`/cats/report/${id}?offset=${offset}&limit=${limit}`);
 
-const getMarkedAnimals = (): Promise<Animal[]> => {
-    return getAll().then(
-        cats => {
-            return cats.filter(cat => cat.favorite);
-        }
-    )
+const getMarkedAnimals = async (): Promise<Animal[]> => {
+    const cats = await getAll();
+    return cats.filter(cat => cat.favorite);
 }
 
 export default {

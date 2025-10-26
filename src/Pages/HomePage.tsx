@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { AnimalService, CameraService, ActivityService } from '@/Services';
-import { Animal, Camera, Activity } from '@/Services/types';
+import { Animal, Camera } from '@/Services/types';
 import CatCard from '@/Components/CatCard';
 import CameraCard from '@/Components/CameraCard';
 import ActivityList, { ActivityItem } from '@/Components/ActivityList';
@@ -11,8 +11,14 @@ import { Plus, FileText, BarChart2, DollarSign } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 
 interface JwtPayload {
+  id?: number;
+  email?: string;
   name?: string;
-  company?: string;
+  company?: {
+    id: number;
+    name?: string;
+  };
+  access_level?: string;
   [key: string]: any;
 }
 
@@ -31,146 +37,19 @@ const HomePage = () => {
   });
   const [companyId, setCompanyId] = useState<string>('');
 
-  useEffect(() => {
-    const token = Cookies.get('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        setEmployeeName(decoded.name || 'Funcionário');
-        if (decoded.company) {
-          setCompanyId(decoded.company);
-        }
-      } catch (error) {
-        console.error('Error decoding token:', error);
-      }
-    }
+  const formatActivityDateTime = useCallback((date: Date): { date: string; time: string } => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return {
+      date: `${day}/${month}`,
+      time: `${hours}:${minutes}`
+    };
   }, []);
 
-  useEffect(() => {
-    if (!companyId) return;
-
-    const fetchMarkedCats = async () => {
-      try {
-        const cats = await AnimalService.getMarkedAnimals(companyId);
-        setMarkedCats(cats);
-        setLoading(prev => ({ ...prev, cats: false }));
-      } catch (error) {
-        console.error('Error fetching marked cats:', error);
-        setLoading(prev => ({ ...prev, cats: false }));
-      }
-    };
-
-    const fetchCameras = async () => {
-      try {
-        const allCameras = await CameraService.getAll(companyId);
-        const activeCameras = allCameras.filter(camera => camera.cameraStatus === 1);
-        setCameras(activeCameras.slice(0, 3));
-        setLoading(prev => ({ ...prev, cameras: false }));
-      } catch (error) {
-        console.error('Error fetching cameras:', error);
-        setLoading(prev => ({ ...prev, cameras: false }));
-      }
-    };
-
-    const fetchActivities = async () => {
-      try {
-        const recentActivities = await fetchRecentActivities(companyId);
-        setActivities(recentActivities);
-        setLoading(prev => ({ ...prev, activities: false }));
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-        setLoading(prev => ({ ...prev, activities: false }));
-      }
-    };
-
-    fetchMarkedCats();
-    fetchCameras();
-    fetchActivities();
-  }, [companyId]);
-
-
-  const fetchRecentActivities = async (companyId: string): Promise<ActivityItem[]> => {
-    // MOCKADO - Precisa de endpoint na api
-    const dummyActivities: ActivityItem[] = [];
-    
-    try {
-      const cats = await AnimalService.getAll(companyId, 0, 5);
-      
-      if (cats.length > 0) {
-        const activityTypes = ['Alimentação', 'Soneca', 'Brincadeira', 'Necessidades'];
-        const dates = ['18/04', '17/04', '16/04'];
-        const times = ['19:05', '17:41', '15:32', '14:45', '13:20'];
-        const locations = ['Área comum', 'Área de descanso', 'Quintal', 'Cozinha'];
-        
-        cats.forEach((cat, index) => {
-          for (let i = 0; i < 2; i++) {
-            const date = dates[Math.floor(Math.random() * dates.length)];
-            const time = times[Math.floor(Math.random() * times.length)];
-            const activityType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-            const location = locations[Math.floor(Math.random() * locations.length)];
-            
-            dummyActivities.push({
-              id: `activity-${index}-${i}`,
-              title: cat.petName,
-              subtitle: `${cat.petGender} · ${calculateAge(cat.petBirth)} anos`,
-              imageUrl: cat.petPicture || '/imgs/cat_sample.jpg',
-              timestamp: {
-                date,
-                time
-              },
-              catId: cat._id,
-              metadata: {
-                status: getStatusText(cat.petStatus?.petCurrentStatus),
-                location,
-                activityName: activityType
-              }
-            });
-          }
-        });
-        
-        dummyActivities.sort((a, b) => {
-          const dateA = parseInt(a.timestamp.date.split('/')[0]);
-          const dateB = parseInt(b.timestamp.date.split('/')[0]);
-          if (dateA !== dateB) return dateB - dateA;
-          
-          const timeA = a.timestamp.time.split(':').map(n => parseInt(n));
-          const timeB = b.timestamp.time.split(':').map(n => parseInt(n));
-          
-          if (timeA[0] !== timeB[0]) return timeB[0] - timeA[0];
-          return timeB[1] - timeA[1];
-        });
-      }
-      
-      return dummyActivities;
-    } catch (error) {
-      console.error('Error creating mock activities:', error);
-      return [];
-    }
-  };
-
-  const mapCatStatus = (status?: string): 'healthy' | 'attention' | 'critical' => {
-    if (!status) return 'healthy';
-    
-    switch (status) {
-      case '0': return 'healthy';
-      case '1': return 'attention';
-      case '2': return 'critical';
-      default: return 'healthy';
-    }
-  };
-
-  const getStatusText = (status?: string): string => {
-    if (!status) return 'Saudável';
-    
-    switch (status) {
-      case '0': return 'Saudável';
-      case '1': return 'Em atenção';
-      case '2': return 'Crítico';
-      default: return 'Saudável';
-    }
-  };
-
-  const calculateAge = (birthDate?: Date): number => {
+  const calculateAge = useCallback((birthDate?: Date | string): number => {
     if (!birthDate) return 0;
     
     const birth = new Date(birthDate);
@@ -183,20 +62,150 @@ const HomePage = () => {
     }
     
     return age;
+  }, []);
+
+  const getStatusText = useCallback((status?: string): string => {
+    if (!status) return 'Saudável';
+    
+    switch (status) {
+      case '0': return 'Saudável';
+      case '1': return 'Em atenção';
+      case '2': return 'Crítico';
+      default: return 'Saudável';
+    }
+  }, []);
+
+  const fetchRecentActivities = useCallback(async (companyId: string): Promise<ActivityItem[]> => {
+    try {
+      // Fetch activities with cat data included (backend includes relations: ['cat'])
+      const activities = await ActivityService.getByCompany(companyId, 0, 10);
+      
+      if (!activities || activities.length === 0) {
+        return [];
+      }
+
+      const activityTitles: Record<string, string> = {
+        'eat': 'Alimentação',
+        'sleep': 'Soneca',
+        'defecate': 'Defecando',
+        'urinate': 'Urinando'
+      };
+
+      const locations = ['Área comum', 'Área de descanso', 'Quintal', 'Cozinha'];
+
+      const formattedActivities: ActivityItem[] = activities
+        .filter((activity) => activity.cat) // Only include activities with cat data
+        .map((activity) => {
+          const startedAt = new Date(activity.startedAt);
+          const { date, time } = formatActivityDateTime(startedAt);
+          
+          return {
+            id: activity.id.toString(),
+            title: activity.cat.name || activity.cat.petName || 'Unknown Cat',
+            subtitle: `${activity.cat.sex || activity.cat.petGender} · ${calculateAge(activity.cat.birthDate || activity.cat.petBirth)} anos`,
+            imageUrl: activity.cat.picture || activity.cat.petPicture || '/imgs/cat_sample.jpg',
+            timestamp: { date, time },
+            catId: activity.cat.id?.toString() || activity.cat._id || '',
+            metadata: {
+              status: getStatusText(activity.cat.status || activity.cat.petStatus?.petCurrentStatus),
+              location: locations[Math.floor(Math.random() * locations.length)],
+              activityName: activityTitles[activity.title] || activity.title
+            }
+          };
+        });
+
+      return formattedActivities;
+    } catch (error) {
+      console.error('Error fetching real activities:', error);
+      return [];
+    }
+  }, [formatActivityDateTime, calculateAge, getStatusText]);
+
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(token);
+        setEmployeeName(decoded.name || 'Funcionário');
+        // Extract company ID from JWT
+        if (decoded.company && typeof decoded.company === 'object') {
+          setCompanyId(decoded.company.id.toString());
+        }
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!companyId) return;
+
+    const fetchActivities = async () => {
+      try {
+        const recentActivities = await fetchRecentActivities(companyId);
+        setActivities(recentActivities);
+        setLoading(prev => ({ ...prev, activities: false }));
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+        setLoading(prev => ({ ...prev, activities: false }));
+      }
+    };
+
+    fetchActivities();
+  }, [companyId, fetchRecentActivities]);
+
+  useEffect(() => {
+    const fetchMarkedCats = async () => {
+      try {
+        const cats = await AnimalService.getMarkedAnimals();
+        setMarkedCats(cats);
+        setLoading(prev => ({ ...prev, cats: false }));
+      } catch (error) {
+        console.error('Error fetching marked cats:', error);
+        setLoading(prev => ({ ...prev, cats: false }));
+      }
+    };
+
+    const fetchCameras = async () => {
+      try {
+        const allCameras = await CameraService.getAll(0, 3);
+        const activeCameras = allCameras.filter(camera => !camera.deleted);
+        setCameras(activeCameras);
+        setLoading(prev => ({ ...prev, cameras: false }));
+      } catch (error) {
+        console.error('Error fetching cameras:', error);
+        setLoading(prev => ({ ...prev, cameras: false }));
+      }
+    };
+
+    fetchMarkedCats();
+    fetchCameras();
+  }, []);
+
+
+  const mapCatStatus = (status?: string): 'healthy' | 'attention' | 'critical' => {
+    if (!status) return 'healthy';
+    
+    switch (status) {
+      case '0': return 'healthy';
+      case '1': return 'attention';
+      case '2': return 'critical';
+      default: return 'healthy';
+    }
   };
 
   const handleMarkToggle = async (id: string, marked: boolean) => {
     try {
       const response = await AnimalService.update(id, {
-        petFavorite: marked
+        favorite: marked
       });
 
-      if (response.ok) {
+      if (response.success) {
         if (marked) {
           const cat = await AnimalService.getOne(id);
           setMarkedCats(prev => [...prev, cat]);
         } else {
-          setMarkedCats(prev => prev.filter(cat => cat._id !== id));
+          setMarkedCats(prev => prev.filter(cat => (cat.id?.toString() || cat._id) !== id));
         }
       }
     } catch (error) {
@@ -277,13 +286,13 @@ const HomePage = () => {
             >
               {markedCats.map((cat) => (
                 <CatCard
-                  key={cat._id}
-                  id={cat._id}
-                  name={cat.petName}
-                  gender={cat.petGender}
-                  age={calculateAge(cat.petBirth)}
-                  imageUrl={cat.petPicture || '/imgs/cat_sample.jpg'}
-                  status={mapCatStatus(cat.petStatus?.petCurrentStatus)}
+                  key={cat.id || cat._id || ''}
+                  id={cat.id?.toString() || cat._id || ''}
+                  name={cat.name || cat.petName || 'Unknown'}
+                  gender={cat.sex || cat.petGender || ''}
+                  age={calculateAge(cat.birthDate || cat.petBirth)}
+                  imageUrl={cat.picture || cat.petPicture || '/imgs/cat_sample.jpg'}
+                  status={mapCatStatus(cat.status || cat.petStatus?.petCurrentStatus)}
                   initialMarked={true}
                   onMarkToggle={handleMarkToggle}
                 />
@@ -321,10 +330,10 @@ const HomePage = () => {
           <div className="grid grid-cols-3 gap-4">
             {cameras.map((camera) => (
               <CameraCard
-                key={camera._id}
-                id={camera._id}
-                name={camera.cameraLocation}
-                imageUrl={camera.cameraPicture || '/imgs/camera_sample.jpg'}
+                key={camera.id || camera._id || ''}
+                id={camera.id?.toString() || camera._id || ''}
+                name={camera.name || camera.cameraLocation || 'Camera'}
+                imageUrl={camera.thumbnail || camera.cameraPicture || '/imgs/camera_sample.jpg'}
               />
             ))}
           </div>

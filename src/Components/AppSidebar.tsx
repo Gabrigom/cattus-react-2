@@ -18,7 +18,7 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 
 interface JwtPayload {
-  company?: string;
+  company?: string | { id: number; name?: string };
   [key: string]: any;
 }
 
@@ -52,12 +52,7 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
   useEffect(() => {
     const fetchMarkedCats = async () => {
       try {
-        const token = Cookies.get('token') || '';
-
-        const decoded = jwtDecode<JwtPayload>(token);
-        const companyId = decoded.company || '';
-
-        const cats = await AnimalService.getMarkedAnimals(companyId)
+        const cats = await AnimalService.getMarkedAnimals();
         setMarkedCats(cats);
         setLoading(false);
       } catch (error) {
@@ -140,7 +135,7 @@ const LogoSection = () => {
   );
 };
 
-const calculateAge = (birthDate?: Date): number => {
+const calculateAge = (birthDate?: Date | string): number => {
   if (!birthDate) return 0;
   
   const birth = new Date(birthDate);
@@ -166,6 +161,26 @@ const getStatusColor = (status?: string): string => {
   }
 };
 
+const getCatId = (cat: Animal): string => {
+  return cat.id?.toString() || cat._id || '';
+};
+
+const getCatName = (cat: Animal): string => {
+  return cat.name || cat.petName || 'Unknown';
+};
+
+const getCatGender = (cat: Animal): string => {
+  return cat.sex || cat.petGender || '';
+};
+
+const getCatPicture = (cat: Animal): string => {
+  return cat.picture || cat.petPicture || '/imgs/cat_sample.jpg';
+};
+
+const getCatStatus = (cat: Animal): string => {
+  return cat.status || cat.petStatus?.petCurrentStatus || '0';
+};
+
 interface QuickViewSectionProps {
   markedCats: Animal[];
   loading: boolean;
@@ -189,43 +204,46 @@ const QuickViewSection = ({ markedCats, loading, onCatClick }: QuickViewSectionP
         defaultExpanded={true}
       >
         <div className="space-y-1">
-          {loading ? (
-            <div className="flex items-center justify-center py-4">
-              <div className="w-5 h-5 border-2 border-gray-600 border-t-white rounded-full animate-spin"></div>
-            </div>
-          ) : markedCats.length > 0 ? (
-            <>
-              {markedCats.slice(0, 4).map((cat) => {
-                const statusColor = getStatusColor(cat.petStatus?.petCurrentStatus);
-                return (
-                  <div
-                    key={cat._id}
-                    className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
-                    onClick={() => onCatClick(cat._id)}
-                  >
-                    <img
-                      src={cat.petPicture || '/imgs/cat_sample.jpg'}
-                      alt={cat.petName}
-                      className={`w-10 h-10 rounded-full mr-3 object-cover border-2`}
-                      style={{ borderColor: statusColor }}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/imgs/cat_sample.jpg';
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {cat.petName}
-                      </p>
-                      <p className="text-xs text-gray-400 truncate">
-                        {cat.petGender} • {calculateAge(cat.petBirth)} anos
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        CID: {cat._id.substring(0, 4)}
-                      </p>
+            {loading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-5 h-5 border-2 border-gray-600 border-t-white rounded-full animate-spin"></div>
+              </div>
+            ) : markedCats.length > 0 ? (
+              <>
+                {markedCats.slice(0, 4).map((cat) => {
+                  const catId = getCatId(cat);
+                  const statusColor = getStatusColor(getCatStatus(cat));
+                  const displayId = catId.length >= 4 ? catId.substring(0, 4) : catId;
+                  
+                  return (
+                    <div
+                      key={catId}
+                      className="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
+                      onClick={() => onCatClick(catId)}
+                    >
+                      <img
+                        src={getCatPicture(cat)}
+                        alt={getCatName(cat)}
+                        className={`w-10 h-10 rounded-full mr-3 object-cover border-2`}
+                        style={{ borderColor: statusColor }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/imgs/cat_sample.jpg';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {getCatName(cat)}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">
+                          {getCatGender(cat)} • {calculateAge(cat.birthDate || cat.petBirth)} anos
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          CID: {displayId}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
               
               {markedCats.length > 4 && (
                 <div

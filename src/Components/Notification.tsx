@@ -22,10 +22,10 @@ interface NotificationItem {
 
 interface NotificationProps {
   token: string;
-  company: string;
+  companyId: string;
 }
 
-const Notification: React.FC<NotificationProps> = ({ token, company }) => {
+const Notification: React.FC<NotificationProps> = ({ token, companyId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -50,7 +50,7 @@ const Notification: React.FC<NotificationProps> = ({ token, company }) => {
   }
 
   function mapNotificationItem(item: any): NotificationItem {
-    const { date, time } = formatDateTime(item.notificationDate);
+    const { date, time } = formatDateTime(item.notificationDate || item.createdAt || new Date());
 
     const typeMap: Record<string, 'improvement' | 'decline' | 'same'> = {
       up: 'improvement',
@@ -58,39 +58,83 @@ const Notification: React.FC<NotificationProps> = ({ token, company }) => {
       same: 'same',
     };
 
-    const statusMap: Record<number, 'healthy' | 'attention' | 'critical'> = {
+    const statusMap: Record<number | string, 'healthy' | 'attention' | 'critical'> = {
       0: 'healthy',
       1: 'attention',
       2: 'critical',
+      '0': 'healthy',
+      '1': 'attention',
+      '2': 'critical',
     };
 
+    // Handle both old (MongoDB) and new (PostgreSQL) structures
+    const cat = item.notificationOrigin || item.cat || item.origin || {};
+    const catName = cat.petName || cat.name || 'Unknown Cat';
+    const catImageUrl = cat.petPicture || cat.picture || '/imgs/cat_sample.jpg';
+    const catId = cat._id || cat.id?.toString() || '';
+    
+    // Handle status - could be nested or direct
+    const statusValue = cat.petStatus?.petCurrentStatus || cat.status || cat.newStatus;
+    const newStatus = statusMap[statusValue] || 'healthy';
+
     return {
-      id: item._id,
-      catId: item.notificationOrigin._id,
-      catName: item.notificationOrigin.petName,
-      catImageUrl: item.notificationOrigin.petPicture,
-      newStatus: statusMap[item.notificationOrigin.petStatus.petCurrentStatus],
-      reason: item.notificationDescription,
+      id: item._id || item.id?.toString() || '',
+      catId: catId,
+      catName: catName,
+      catImageUrl: catImageUrl,
+      newStatus: newStatus,
+      reason: item.notificationDescription || item.description || item.reason || '',
       date,
       time,
-      isRead: item.notificationStatus,
-      type: typeMap[item.notificationDirection] ?? undefined,
+      isRead: item.notificationStatus !== false && item.notificationStatus !== 0,
+      type: typeMap[item.notificationDirection || item.direction] ?? undefined,
     };
   }
 
-  async function getNotifications(company: string, token: string) {
-    const request = await fetch(`http://ec2-52-15-64-33.us-east-2.compute.amazonaws.com/notification/select-all/${company}`, {
-      headers: { "Authorization": token }
-    });
-    const response = await request.json();
-    const data: NotificationItem[] = response.result.map(mapNotificationItem);
-    setNotifications(data)
+  async function getNotifications(companyId: string, token: string) {
+    try {
+      // Notification endpoint not yet available in new API
+      // TODO: Implement notification endpoints in backend
+      console.log('Notifications feature not yet migrated to new API');
+      setNotifications([]);
+      return;
+      
+      /* Commented out until notification endpoints are implemented
+      const request = await fetch(`http://localhost:3000/notifications/${companyId}`, {
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      
+      if (!request.ok) {
+        console.error('Error fetching notifications:', request.status);
+        return;
+      }
+      
+      const response = await request.json();
+      // Handle new API response structure { success: true, data: [...] }
+      const data: NotificationItem[] = response.data 
+        ? response.data.map(mapNotificationItem) 
+        : response.result?.map(mapNotificationItem) || [];
+      setNotifications(data);
+      */
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setNotifications([]);
+    }
   }
 
   useEffect(() => {
-    getNotifications(company, token)
+    if (!companyId || !token) return;
+    
+    getNotifications(companyId, token);
 
-    const ws = new WebSocket(`ws://127.0.0.1:8000/ws/notifications?token=${token}`);
+    // WebSocket connection for real-time updates
+    // TODO: Implement WebSocket support for notifications in new backend
+    // Disabled until notification system is fully migrated
+    /*
+    const ws = new WebSocket(`ws://localhost:8000/ws/notifications?token=${token}`);
     socketRef.current = ws;
 
     ws.onopen = () => {
@@ -101,7 +145,7 @@ const Notification: React.FC<NotificationProps> = ({ token, company }) => {
       try {
         if (event.data == "nova_notificacao") {
           console.log("[WS] Nova notificação recebida — buscando atualizações...");
-          getNotifications(company, token)
+          getNotifications(companyId, token);
         }
       } catch (error) {
         console.error('[WS] Erro ao processar mensagem:', error);
@@ -119,7 +163,8 @@ const Notification: React.FC<NotificationProps> = ({ token, company }) => {
     return () => {
       ws.close();
     };
-  }, [token]);
+    */
+  }, [token, companyId]);
 
   const unreadCount = notifications.filter(notif => !notif.isRead).length;
 

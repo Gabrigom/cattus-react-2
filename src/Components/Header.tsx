@@ -10,9 +10,9 @@ import { useLocation } from 'react-router-dom';
 
 interface JwtPayload {
   name?: string;
-  id?: string;
+  id?: number;
   companyName?: string;
-  company?: string;
+  company?: string | { id: number; name?: string };
   picture?: string;
   [key: string]: any;
 }
@@ -22,7 +22,8 @@ const Header = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState<string>('/imgs/profile_sample.png');
-  const [userCompany, setUserCompany] = useState<string | ''>('')
+  const [userCompany, setUserCompany] = useState<string>('')
+  const [userCompanyId, setUserCompanyId] = useState<string>('')
   const profileBtnRef = useRef<HTMLButtonElement>(null);
  
   const location = useLocation();
@@ -38,8 +39,16 @@ const Header = () => {
         if (decoded.picture){
           setProfilePicture(decoded.picture);
         }
-        if (decoded.company) setUserCompany(decoded.company)
-
+        // Handle both old (string) and new (object) company structure
+        if (decoded.company) {
+          if (typeof decoded.company === 'object' && decoded.company.id) {
+            setUserCompany(decoded.company.name || '');
+            setUserCompanyId(decoded.company.id.toString());
+          } else if (typeof decoded.company === 'string') {
+            setUserCompany(decoded.company);
+            setUserCompanyId(decoded.company);
+          }
+        }
       } catch (error) {
         console.error('Error decoding token:', error);
       }
@@ -105,8 +114,8 @@ const Header = () => {
       </form>
      
       <div className="flex items-center space-x-4">
-        {userCompany && (
-          <Notification token={Cookies.get('token')} company={userCompany} />
+        {userCompanyId && (
+          <Notification token={Cookies.get('token') || ''} companyId={userCompanyId} />
         )}
        
         <div className="relative">

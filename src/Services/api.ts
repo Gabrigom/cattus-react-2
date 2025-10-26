@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
-export const API_URL = "https://cattus.ddns.net";
+export const API_URL = "http://localhost:3000";
 
 export const getData = async <T>(path: string, id: string = ''): Promise<T> => {
     try {
