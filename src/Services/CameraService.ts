@@ -1,23 +1,23 @@
 import { getData, postDataJSON, updateData, deleteData } from './api';
 import { Camera, CameraResponse } from './types';
 
-const getAll = (companyId: string): Promise<Camera[]> => 
-    getData<Camera[]>(`/camera/select-all/${companyId}`);
+const getAll = (offset: number = 0, limit: number = 50): Promise<Camera[]> => 
+    getData<Camera[]>(`/cameras?offset=${offset}&limit=${limit}`);
 
 const getOne = (id: string): Promise<Camera> => 
-    getData<Camera>('/camera/select-one/', id);
+    getData<Camera>('/cameras/', id);
 
 const create = (data: Partial<Camera>): Promise<CameraResponse> => 
-    postDataJSON<CameraResponse>('/camera/create', data, "Câmera cadastrada com sucesso!");
+    postDataJSON<CameraResponse>('/cameras', data, "Câmera cadastrada com sucesso!");
 
 const update = (id: string, data: Partial<Camera>): Promise<CameraResponse> => 
-    updateData<CameraResponse>('/camera/update/', id, data, "Dados da câmera atualizados com sucesso!");
+    updateData<CameraResponse>('/cameras/', id, data, "Dados da câmera atualizados com sucesso!");
 
 const remove = (id: string): Promise<boolean> => 
-    deleteData('/camera/delete/', id, "Câmera removida com sucesso!");
+    deleteData('/cameras/', id, "Câmera removida com sucesso!");
 
-const search = (query: string, fields: string[]): Promise<Camera[]> => 
-    postDataJSON<Camera[]>('/camera/search', { query, fields });
+const softDelete = (id: string): Promise<CameraResponse> => 
+    updateData<CameraResponse>('/cameras/', id, {}, "Câmera removida com sucesso!");
 
 export default {
     getAll,
@@ -25,5 +25,5 @@ export default {
     create,
     update,
     remove,
-    search
+    softDelete
 };

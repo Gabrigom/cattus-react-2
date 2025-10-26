@@ -1,14 +1,15 @@
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
-export const API_URL = "http://ec2-52-15-64-33.us-east-2.compute.amazonaws.com";
+export const API_URL = "https://cattus.ddns.net";
 
 export const getData = async <T>(path: string, id: string = ''): Promise<T> => {
     try {
         const response = await fetch(`${API_URL}${path}${id}`, {
             method: "GET",
             headers: {
-                "authorization": Cookies.get("token") || ''
+                "Authorization": `Bearer ${Cookies.get("token") || ''}`,
+                "Accept": "*/*"
             }
         });
 
@@ -24,7 +25,7 @@ export const getData = async <T>(path: string, id: string = ''): Promise<T> => {
         }
 
         const data = await response.json();
-        return (data.result || data) as T;
+        return data.data as T;
     } catch (error) {
         console.error("API Error:", error);
         throw error;
@@ -36,8 +37,9 @@ export const postDataJSON = async <T>(path: string, body: any, message?: string)
         const response = await fetch(`${API_URL}${path}`, {
             method: "POST",
             headers: {
-                'authorization': Cookies.get("token") || '',
-                'Content-Type': "application/json"
+                'Authorization': `Bearer ${Cookies.get("token") || ''}`,
+                'Content-Type': "application/json",
+                'Accept': "*/*"
             },
             body: JSON.stringify(body)
         });
@@ -50,7 +52,7 @@ export const postDataJSON = async <T>(path: string, body: any, message?: string)
 
         const data = await response.json();
 
-        if (data.ok && message) {
+        if (data.success && message) {
             toast.success(message);
         } else if (data.message) {
             toast.error(data.message);
@@ -69,7 +71,8 @@ export const postDataFormData = async <T>(path: string, formData: FormData, mess
         const response = await fetch(`${API_URL}${path}`, {
             method: "POST",
             headers: {
-                'authorization': Cookies.get("token") || ''
+                'Authorization': `Bearer ${Cookies.get("token") || ''}`,
+                'Accept': "*/*"
             },
             body: formData
         });
@@ -82,7 +85,7 @@ export const postDataFormData = async <T>(path: string, formData: FormData, mess
 
         const data = await response.json();
 
-        if (data.ok && message) {
+        if (data.success && message) {
             toast.success(message);
         } else if (data.message) {
             toast.error(data.message);
@@ -101,7 +104,8 @@ export const deleteData = async (path: string, id: string, message?: string): Pr
         const response = await fetch(`${API_URL}${path}${id}`, {
             method: "DELETE",
             headers: {
-                'authorization': Cookies.get("token") || ''
+                'Authorization': `Bearer ${Cookies.get("token") || ''}`,
+                'Accept': "*/*"
             }
         });
 
@@ -129,7 +133,8 @@ export const updateData = async <T>(path: string, id: string, body: any, message
             method: "PATCH",
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': Cookies.get("token") || ''
+                'Authorization': `Bearer ${Cookies.get("token") || ''}`,
+                'Accept': "*/*"
             },
             body: JSON.stringify(body)
         });
@@ -142,7 +147,7 @@ export const updateData = async <T>(path: string, id: string, body: any, message
 
         const data = await response.json();
         
-        if (data.ok && message) {
+        if (data.success && message) {
             toast.success(message);
         }
 
@@ -159,7 +164,8 @@ export const uploadImage = async <T>(formData: FormData): Promise<T> => {
         const response = await fetch(`${API_URL}/upload-image`, {
             method: "POST",
             headers: {
-                'authorization': Cookies.get("token") || ''
+                'Authorization': `Bearer ${Cookies.get("token") || ''}`,
+                'Accept': "*/*"
             },
             body: formData
         });

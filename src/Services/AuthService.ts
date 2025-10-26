@@ -1,22 +1,23 @@
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
-import { API_URL, getData } from './api';
+import { API_URL } from './api';
 import { LoginCredentials, LoginResponse } from './types';
 
 const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
     try {
-        const response = await fetch(`${API_URL}/employee/login`, {
+        const response = await fetch(`${API_URL}/auth`, {
             method: "POST",
             headers: {
-                'Content-Type': "application/json"
+                'Content-Type': "application/json",
+                'Accept': "*/*"
             },
             body: JSON.stringify(credentials)
         });
 
         const data = await response.json();
 
-        if (data.ok) {
-            Cookies.set("token", data.token);
+        if (data.success) {
+            Cookies.set("token", data.data.token);
             return data as LoginResponse;
         } else {
             toast.error(data.message || "Erro ao fazer login");
@@ -29,7 +30,6 @@ const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
 };
 
 const logout = async (): Promise<void> => {
-    await getData('/employee/logout');
     Cookies.remove("token");
     window.location.href = "/login";
 };

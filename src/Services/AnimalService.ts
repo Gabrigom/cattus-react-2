@@ -1,38 +1,37 @@
 import { getData, postDataJSON, postDataFormData, updateData, deleteData } from './api';
 import { Animal, AnimalResponse } from './types';
 
-const getAll = (companyId: string, skip: number = 0, limit: number = 100): Promise<Animal[]> => 
-    getData<Animal[]>(`/animal/select-all/${companyId}?skip=${skip}&limit=${limit}`);
+const getAll = (offset: number = 0, limit: number = 50): Promise<Animal[]> => 
+    getData<Animal[]>(`/cats?offset=${offset}&limit=${limit}`);
 
 const getOne = (id: string): Promise<Animal> => 
-    getData<Animal>('/animal/select-one/', id);
+    getData<Animal>('/cats/', id);
 
 const create = (formData: FormData): Promise<AnimalResponse> => 
-    postDataFormData<AnimalResponse>('/animal/create', formData, "Gato cadastrado com sucesso!");
+    postDataFormData<AnimalResponse>('/cats', formData, "Gato cadastrado com sucesso!");
 
 const update = (id: string, data: Partial<Animal>): Promise<AnimalResponse> => 
-    updateData<AnimalResponse>('/animal/update/', id, data, "Dados do gato atualizados com sucesso!");
+    updateData<AnimalResponse>('/cats/', id, data, "Dados do gato atualizados com sucesso!");
 
 const remove = (id: string): Promise<boolean> => 
-    deleteData('/animal/delete/', id, "Gato removido com sucesso!");
+    deleteData('/cats/', id, "Gato removido com sucesso!");
 
-const search = (query: string, fields: string[]): Promise<Animal[]> => 
-    postDataJSON<Animal[]>('/animal/search', { query, fields });
+const softDelete = (id: string): Promise<AnimalResponse> => 
+    updateData<AnimalResponse>('/cats/', id, {}, "Gato removido com sucesso!");
 
-const getSickAnimals = (): Promise<any> => 
-    getData<any>('/animal/charts/sick-animals');
+const changeFavorite = (id: string): Promise<AnimalResponse> => 
+    updateData<AnimalResponse>('/cats/', id, {}, "Favorito atualizado com sucesso!");
 
-const getTotalAnimals = (): Promise<any> => 
-    getData<any>('/animal/charts/total-animals');
+const generateReport = (id: string, offset: number = 0, limit: number = 50): Promise<any> => 
+    getData<any>(`/cats/report/${id}?offset=${offset}&limit=${limit}`);
 
-const getMarkedAnimals = (companyId: string): Promise<Animal[]> => {
-    return getAll(companyId).then(
+const getMarkedAnimals = (): Promise<Animal[]> => {
+    return getAll().then(
         cats => {
-            return cats.filter(cat => cat.petFavorite);
+            return cats.filter(cat => cat.favorite);
         }
     )
 }
-
 
 export default {
     getAll,
@@ -40,8 +39,8 @@ export default {
     create,
     update,
     remove,
-    search,
-    getSickAnimals,
-    getTotalAnimals,
+    softDelete,
+    changeFavorite,
+    generateReport,
     getMarkedAnimals
 };

@@ -1,28 +1,23 @@
 import { postDataJSON } from './api';
 import { toast } from 'react-toastify';
-
-interface FeedbackResponse {
-  ok: boolean;
-  message?: string;
-  _id?: string;
-}
+import { ApiResponse, Feedback } from './types';
 
 interface FeedbackData {
-  feedbackText: string;
-  feedbackAuthor?: string;
+  text: string;
+  author?: string;
   company?: string; 
 }
 
-const submitFeedback = async (data: FeedbackData): Promise<FeedbackResponse> => {
+const submitFeedback = async (data: FeedbackData): Promise<ApiResponse> => {
   try {
-    // Placeholder
-    // return await postDataJSON<FeedbackResponse>('/feedback/create', data, "Feedback enviado com sucesso!");
+    // Placeholder - feedback endpoint not implemented in NestJS yet
+    // return await postDataJSON<ApiResponse>('/feedback', data, "Feedback enviado com sucesso!");
     
     await new Promise(resolve => setTimeout(resolve, 1000));
     return {
-      ok: true,
+      success: true,
       message: "Feedback enviado com sucesso!",
-      _id: "placeholder-id"
+      data: { id: "placeholder-id" }
     };
   } catch (error) {
     console.error('Error submitting feedback:', error);

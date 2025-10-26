@@ -8,7 +8,7 @@ interface ReportOptions {
   activities?: boolean;
 }
 
-const getAnimalReport = async (animalId: string, options: string[] = ['profile']): Promise<void> => {
+const getAnimalReport = async (animalId: string, offset: number = 0, limit: number = 50): Promise<void> => {
   try {
     const token = Cookies.get('token');
     if (!token) {
@@ -16,13 +16,11 @@ const getAnimalReport = async (animalId: string, options: string[] = ['profile']
       return;
     }
     
-    const response = await fetch(`${API_URL}/report/${animalId}`, {
-      method: 'POST',
+    const response = await fetch(`${API_URL}/cats/report/${animalId}?offset=${offset}&limit=${limit}`, {
+      method: 'GET',
       headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ options })
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     if (!response.ok) {

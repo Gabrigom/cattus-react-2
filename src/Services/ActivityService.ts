@@ -1,30 +1,21 @@
-import { get } from 'http';
-import { getData, postDataJSON, deleteData } from './api';
+import { getData, postDataJSON, updateData } from './api';
 import { Activity, ActivityResponse } from './types';
 
-const getAll = (animalId: string): Promise<Activity[]> => 
-    getData<Activity[]>(`/activity/select-all/${animalId}`);
+const getByCat = (catId: string, offset: number = 0, limit: number = 50): Promise<Activity[]> => 
+    getData<Activity[]>(`/activities/${catId}/cat?offset=${offset}&limit=${limit}`);
 
-const getOne = (id: string): Promise<Activity> => 
-    getData<Activity>('/activity/select-one/', id);
+const getByCompany = (companyId: string, offset: number = 0, limit: number = 50): Promise<Activity[]> => 
+    getData<Activity[]>(`/activities/${companyId}/company?offset=${offset}&limit=${limit}`);
 
 const create = (data: Partial<Activity>): Promise<ActivityResponse> => 
-    postDataJSON<ActivityResponse>('/activity/create', data, "Atividade registrada com sucesso!");
+    postDataJSON<ActivityResponse>('/activities', data, "Atividade registrada com sucesso!");
 
-const remove = (id: string): Promise<boolean> => 
-    deleteData('/activity/delete/', id, "Atividade removida com sucesso!");
-
-const getAverageActivity = (interval: string): Promise<any> => 
-    getData<any>(`/activity/charts/average-animal-activity/${interval}`);
-
-const getByCameraId = (cameraId: string): Promise<Activity[]> =>
-    getData<Activity[]>(`/activity/select-by-camera/${cameraId}`);
+const update = (id: string, data: Partial<Activity>): Promise<ActivityResponse> => 
+    updateData<ActivityResponse>('/activities/', id, data, "Atividade atualizada com sucesso!");
 
 export default {
-    getAll,
-    getOne,
+    getByCat,
+    getByCompany,
     create,
-    remove,
-    getAverageActivity,
-    getByCameraId
+    update
 };
