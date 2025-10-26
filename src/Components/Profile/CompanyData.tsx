@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { toast } from 'react-toastify';
 import { CompanyService } from '@/Services';
+import { DollarSign } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CompanyDataProps {
   _id: string;
@@ -15,11 +16,11 @@ interface CompanyDataProps {
 }
 
 const CompanyData: React.FC<CompanyDataProps> = ({ _id, cnpj, name, logo, phone, color }) => {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     phone: phone,
-    color: color || '#3c8054',
   });
   const [newLogo, setNewLogo] = useState<File | null>(null);
   const [previewLogo, setPreviewLogo] = useState<string | null>(null);
@@ -29,10 +30,6 @@ const CompanyData: React.FC<CompanyDataProps> = ({ _id, cnpj, name, logo, phone,
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (value: string) => {
-    setFormData(prev => ({ ...prev, color: value }));
   };
 
   const handleLogoClick = () => {
@@ -56,10 +53,6 @@ const CompanyData: React.FC<CompanyDataProps> = ({ _id, cnpj, name, logo, phone,
       
       if (formData.phone !== phone) {
         updateData['companyDetails.companyPhone'] = formData.phone;
-      }
-      
-      if (formData.color !== color) {
-        updateData['companyDetails.companyColor'] = formData.color;
       }
 
       if (newLogo) {
@@ -94,25 +87,20 @@ const CompanyData: React.FC<CompanyDataProps> = ({ _id, cnpj, name, logo, phone,
     setIsEditing(false);
     setFormData({
       phone: phone,
-      color: color,
     });
     setNewLogo(null);
     setPreviewLogo(null);
   };
 
-  const colorOptions = [
-    { name: 'Verde', value: '#3c8054' },
-    { name: 'Roxo', value: '#6C1482' },
-    { name: 'Azul', value: '#1465BB' },
-    { name: 'Vermelho', value: '#BB1414' },
-    { name: 'Laranja', value: '#BB7114' },
-  ];
+  const handleMembershipClick = () => {
+    navigate('/membership');
+  };
 
   return (
     <div className="bg-[#324250] rounded-md overflow-hidden">
       <div 
         className="p-3 flex justify-between items-center"
-        style={{ backgroundColor: formData.color }}
+        style={{ backgroundColor: color || '#3c8054' }}
       >
         <h2 className="text-lg font-semibold text-white">{name}</h2>
       </div>
@@ -156,51 +144,20 @@ const CompanyData: React.FC<CompanyDataProps> = ({ _id, cnpj, name, logo, phone,
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white mb-2">Cor</label>
-              <Select
-                value={formData.color}
-                onValueChange={handleSelectChange}
-                disabled={!isEditing}
-              >
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder="Selecione uma cor" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-600">
-                  {colorOptions.map(option => (
-                    <SelectItem 
-                      key={option.value} 
-                      value={option.value}
-                    >
-                      <div className="flex items-center">
-                        <div 
-                          className="w-4 h-4 rounded-full mr-2" 
-                          style={{ backgroundColor: option.value }}
-                        ></div>
-                        {option.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <label className="block text-white mb-2">Telefone</label>
-              <Input
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="bg-gray-700 border-gray-600 text-white"
-              />
-            </div>
+          <div>
+            <label className="block text-white mb-2">Telefone</label>
+            <Input
+              name="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="bg-gray-700 border-gray-600 text-white"
+            />
           </div>
         </div>
 
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex justify-center space-x-3">
           {isEditing ? (
             <div className="flex gap-3">
               <Button 
@@ -219,12 +176,21 @@ const CompanyData: React.FC<CompanyDataProps> = ({ _id, cnpj, name, logo, phone,
               </Button>
             </div>
           ) : (
-            <Button 
-              onClick={() => setIsEditing(true)}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              EDITAR
-            </Button>
+            <>
+              <Button 
+                onClick={() => setIsEditing(true)}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                EDITAR
+              </Button>
+              <Button 
+                onClick={handleMembershipClick}
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+              >
+                <DollarSign size={18} />
+                ASSINATURA
+              </Button>
+            </>
           )}
         </div>
       </div>

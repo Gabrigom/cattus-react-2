@@ -3,7 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { EmployeeData, CompanyData } from '@/Components/Profile';
 import { EmployeeService, CompanyService } from '@/Services';
-import { Employee, Company } from '@/Services/types';
+import { User, Company } from '@/Services/types';
 
 interface JwtPayload {
   id?: string;
@@ -14,11 +14,12 @@ interface JwtPayload {
 }
 
 interface EmployeeWithCompany {
-  _id: string;
-  employeeName: string;
-  employeeEmail: string;
-  employeePicture: string;
-  employeeAccessLevel: number;
+  id?: string | number;
+  _id?: string;
+  name: string;
+  email: string;
+  picture?: string;
+  access_level: string;
   company: Company;
 }
 
@@ -47,9 +48,10 @@ const ProfilePage = () => {
         }
 
         const employeeData = await EmployeeService.getOne(employeeId);
+        console.log('Employee data received:', employeeData);
         
-        if (employeeData && typeof employeeData.company === 'object') {
-          setEmployee(employeeData as unknown as EmployeeWithCompany);
+        if (employeeData && employeeData.company) {
+          setEmployee(employeeData as EmployeeWithCompany);
         } else {
           setError('Dados da empresa não encontrados');
         }
@@ -86,19 +88,19 @@ const ProfilePage = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <EmployeeData 
-          _id={employee._id}
-          name={employee.employeeName}
-          picture={employee.employeePicture}
-          email={employee.employeeEmail}
+          _id={String(employee.id || employee._id || '')}
+          name={employee.name}
+          picture={employee.picture || '/imgs/profile_sample.png'}
+          email={employee.email}
         />
         
         <CompanyData 
-          _id={employee.company._id}
-          cnpj={employee.company.companyCNPJ}
-          name={employee.company.companyName}
-          logo={employee.company.companyLogo}
-          phone={employee.company.companyDetails?.companyPhone !== undefined ? String(employee.company.companyDetails.companyPhone) : ''}
-          color={employee.company.companyDetails?.companyColor || '#3c8054'}
+          _id={String(employee.company.id)}
+          cnpj={employee.company.cnpj || ''}
+          name={employee.company.name || ''}
+          logo={employee.company.logo || employee.company.logotype || '/imgs/logo_compact.png'}
+          phone={employee.company.phone || ''}
+          color={employee.company.color || '#3c8054'}
         />
       </div>
     </div>

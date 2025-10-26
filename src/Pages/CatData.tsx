@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CatProfile from '@/Components/CatProfile';
 import CatStatus from '@/Components/CatStatus';
 import CatActivities from '@/Components/CatActivities';
-import ReportSettings from '@/Components/ReportSettings';
 import { Button } from '@/Components/ui/button';
 import { AnimalService, ActivityService, ReportService } from '@/Services';
 import { Animal, Activity } from '@/Services/types';
@@ -17,7 +16,7 @@ const CatData = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   
   const [sectionsState, setSectionsState] = useState({
     profile: true,
@@ -37,19 +36,22 @@ const CatData = () => {
       toast.error('ID do gato não encontrado para gerar relatório.');
       return;
     }
+    
+    const catId = cat.id?.toString() || cat._id || '';
+    if (!catId) {
+      toast.error('ID do gato inválido');
+      return;
+    }
+
     try {
-      const catId = cat.id?.toString() || cat._id || '';
-      if (!catId) {
-        toast.error('ID do gato inválido');
-        return;
-      }
-      // Note: ReportService expects (animalId, offset, limit), not options array
+      setIsGeneratingReport(true);
       await ReportService.getAnimalReport(catId, 0, 50);
-      toast.success('Relatório gerado com sucesso!');
-      setReportModalOpen(false);
+      toast.success('Relatório baixado com sucesso!');
     } catch (error) {
       console.error('Error generating report:', error);
       toast.error('Erro ao gerar relatório');
+    } finally {
+      setIsGeneratingReport(false);
     }
   };
 
@@ -125,10 +127,11 @@ const CatData = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white">Perfil do gato - {cat.name || cat.petName}</h1>
         <Button 
-          onClick={() => setReportModalOpen(true)}
+          onClick={generateReport}
           className="bg-green-600 hover:bg-green-700 text-white"
+          disabled={isGeneratingReport}
         >
-          GERAR RELATÓRIO
+          {isGeneratingReport ? 'GERANDO...' : 'GERAR RELATÓRIO'}
         </Button>
       </div>
 
@@ -152,13 +155,6 @@ const CatData = () => {
           activities={activities}
         />
       </div>
-
-      <ReportSettings
-        open={reportModalOpen}
-        onOpenChange={setReportModalOpen}
-        catId={cat.id?.toString() || cat._id || ''}
-        onGenerateReport={generateReport}
-      />
     </div>
   );
 };

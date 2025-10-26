@@ -158,43 +158,57 @@ const CatProfile = ({ cat, isExpanded, onToggleExpand }: CatProfileProps) => {
                 <span className="text-gray-400 w-1/3">Peso:</span>
                 <span className="text-white">{cat.weight} kg</span>
               </div>
+
+              <div className="space-y-2">
+                <h3 className="text-white">Comorbidades</h3>
+                <div className="flex flex-wrap gap-2">
+                  {cat.comorbidities.length > 0 ? (
+                    cat.comorbidities.map((comorbidity, index) => (
+                      <span 
+                        key={index}
+                        className="px-3 py-1 bg-white text-gray-800 rounded-full text-sm"
+                      >
+                        {comorbidity}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">Nenhuma comorbidade registrada</span>
+                  )}
+                </div>
+              </div>
+            
+              <div className="space-y-2">
+                <h3 className="text-white">Vacinas</h3>
+                <div className="flex flex-wrap gap-2">
+                  {cat.vaccines && cat.vaccines.length > 0 ? (
+                    cat.vaccines.map((vaccine, index) => (
+                      <span 
+                        key={index}
+                        className="px-3 py-1 bg-green-600 text-white rounded-full text-sm"
+                      >
+                        {vaccine}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">Nenhuma vacina registrada</span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="md:w-1/2 space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-white">Comorbidades</h3>
-              <div className="flex flex-wrap gap-2">
-                {cat.comorbidities.length > 0 ? (
-                  cat.comorbidities.map((comorbidity, index) => (
-                    <span 
-                      key={index}
-                      className="px-3 py-1 bg-white text-gray-800 rounded-full text-sm"
-                    >
-                      {comorbidity}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-gray-400">Nenhuma comorbidade registrada</span>
-                )}
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-white">Vacinas</h3>
-              <div className="flex flex-wrap gap-2">
-                {cat.vaccines && cat.vaccines.length > 0 ? (
-                  cat.vaccines.map((vaccine, index) => (
-                    <span 
-                      key={index}
-                      className="px-3 py-1 bg-green-600 text-white rounded-full text-sm"
-                    >
-                      {vaccine}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-gray-400">Nenhuma vacina registrada</span>
-                )}
+            <div className="flex flex-col items-center gap-2">
+              <h3 className="text-white text-lg">Marcador:</h3>
+              <div className="bg-white p-3 rounded-md">
+                <img 
+                  src="/imgs/ArUco_marker_sample.png" 
+                  alt="ArUco Marker"
+                  className="w-full h-auto max-w-xs"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/imgs/cat_sample.jpg';
+                  }}
+                />
               </div>
             </div>
           </div>

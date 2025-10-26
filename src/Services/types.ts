@@ -73,7 +73,7 @@ export interface CameraResponse extends ApiResponse {
   data?: Camera | Camera[];
 }
 
-export type ActivityTitleEnum = 'eat' | 'sleep' | 'defecate' | 'urinate';
+export type ActivityTitleEnum = 'eat' | 'sleep' | 'defecate' | 'urinate' | 'drink';
 
 export interface Activity {
   id: number;
@@ -109,17 +109,19 @@ export interface NotificationResponse extends ApiResponse {
 }
 
 export interface Company {
-  id: number;
-  name: string;
-  cnpj: string;
-  logo: string;
-  color: string;
-  phone: string;
-  users: User[];
-  cats: Animal[];
-  cameras: Camera[];
-  createdAt: Date;
-  updatedAt: Date;
+  id?: number;
+  _id?: string;
+  name?: string;
+  cnpj?: string;
+  logo?: string;
+  logotype?: string;
+  color?: string;
+  phone?: string;
+  users?: User[];
+  cats?: Animal[];
+  cameras?: Camera[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface CompanyResponse extends ApiResponse {
@@ -127,19 +129,20 @@ export interface CompanyResponse extends ApiResponse {
 }
 
 export interface User {
-  id: number;
-  name: string;
-  email: string;
+  id?: number;
+  _id?: string;
+  name?: string;
+  email?: string;
   password?: string;
-  access_level: string;
-  company: Company;
-  createdCameras: Camera[];
-  createdAnimals: Animal[];
-  updatedAnimals: Animal[];
+  access_level?: string;
+  company?: Company;
+  createdCameras?: Camera[];
+  createdAnimals?: Animal[];
+  updatedAnimals?: Animal[];
   createdAt?: Date;
   updatedAt?: Date;
-  deleted: boolean;
-  deletedAt: Date;
+  deleted?: boolean;
+  deletedAt?: Date;
 }
 
 export interface Feedback {

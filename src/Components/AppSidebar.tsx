@@ -11,7 +11,7 @@ import {
   SidebarTrigger,
   useSidebar
 } from './Sidebar';
-import { ChevronRight, Home, Cat, Camera, BarChart2, FileText, DollarSign, Star } from 'lucide-react';
+import { ChevronRight, Home, Cat, Camera, BarChart2, FileText, Star } from 'lucide-react';
 import { AnimalService } from '@/Services';
 import { Animal } from '@/Services/types';
 import Cookies from 'js-cookie';
@@ -31,8 +31,8 @@ interface CatEntry {
 }
 
 interface AppSidebarProps {
-  currentPage: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership';
-  onNavigate?: (page: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership') => void;
+  currentPage: 'home' | 'cats' | 'cameras' | 'stats' | 'reports';
+  onNavigate?: (page: 'home' | 'cats' | 'cameras' | 'stats' | 'reports') => void;
 }
 
 const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
@@ -46,7 +46,6 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
     { icon: <Camera size={22} />, label: 'Câmeras', page: 'cameras', path: '/cameras' },
     { icon: <BarChart2 size={22} />, label: 'Estatísticas', page: 'stats', path: '/stats' },
     { icon: <FileText size={22} />, label: 'Relatórios', page: 'reports', path: '/reports' },
-    { icon: <DollarSign size={22} />, label: 'Assinatura', page: 'membership', path: '/membership' },
   ];
 
   useEffect(() => {
@@ -66,7 +65,7 @@ const AppSidebar = ({ currentPage, onNavigate }: AppSidebarProps) => {
 
   const handleNavigation = (page: string, path: string) => {
     if (onNavigate) {
-      onNavigate(page as 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership');
+      onNavigate(page as 'home' | 'cats' | 'cameras' | 'stats' | 'reports');
     }
     navigate(path);
   };

@@ -5,14 +5,14 @@ import Header from './Header';
 
 interface LayoutProps {
   children: ReactNode;
-  currentPage: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership';
-  onNavigate?: (page: 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership') => void;
+  currentPage: 'home' | 'cats' | 'cameras' | 'stats' | 'reports';
+  onNavigate?: (page: 'home' | 'cats' | 'cameras' | 'stats' | 'reports') => void;
 }
 
 const Layout = ({ children, currentPage, onNavigate }: LayoutProps) => {
   const location = useLocation();
   
-  const getCurrentPageFromPath = (): 'home' | 'cats' | 'cameras' | 'stats' | 'reports' | 'membership' => {
+  const getCurrentPageFromPath = (): 'home' | 'cats' | 'cameras' | 'stats' | 'reports' => {
     const path = location.pathname.split('/')[1];
     
     switch (path) {
@@ -26,8 +26,6 @@ const Layout = ({ children, currentPage, onNavigate }: LayoutProps) => {
         return 'stats';
       case 'reports':
         return 'reports';
-      case 'membership':
-        return 'membership';
       default:
         if (path === 'streaming') {
           return 'cameras';

@@ -2,12 +2,6 @@ import { API_URL } from './api';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
-interface ReportOptions {
-  profile?: boolean;
-  status?: boolean;
-  activities?: boolean;
-}
-
 const getAnimalReport = async (animalId: string, offset: number = 0, limit: number = 50): Promise<void> => {
   try {
     const token = Cookies.get('token');
@@ -28,14 +22,25 @@ const getAnimalReport = async (animalId: string, offset: number = 0, limit: numb
       throw new Error(errorData.message || 'Error generating report');
     }
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+    const data = await response.json();
     
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Relatorio.pdf`;
-    document.body.appendChild(a);
-    a.click();
+    // The API now returns { success, data: { url } }
+    const reportUrl = data.data?.url;
+    
+    if (!reportUrl) {
+      throw new Error('URL do relatório não encontrada na resposta');
+    }
+
+    // Open the S3 URL directly to download the PDF
+    // Using a proxy through an anchor element to avoid CORS issues
+    const link = document.createElement('a');
+    link.href = reportUrl;
+    link.target = '_blank';
+    link.download = 'Relatorio.pdf';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     
     return;
   } catch (error) {
